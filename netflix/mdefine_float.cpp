@@ -1,9 +1,9 @@
 float test_level = 0.004;
 using namespace std;
 void explode(const char * probe,  const char * data ,vector<string> &result);
-void qsort(vector<float>& array, int start, int end);
-int  partition(vector<float>& array, int start, int end);
-bool cmp(float a, float b);
+void qsort(vector<double>& array, int start, int end);
+int  partition(vector<double>& array, int start, int end);
+bool cmp(double a, double b);
 Rating::Rating(short u_item,int u_user,short u_rate)//float u_rate,int year=1970,int month=1,int day=1)
 {
     item = u_item;
@@ -25,7 +25,7 @@ short Rating::value()
     return rate;
 }
 /*
-float Rating::predict()
+double Rating::predict()
 {
     return 0.0;
 }
@@ -42,10 +42,11 @@ int Rating::month()
 }
 */
 
-float dot(float p[], vector<float> &q)
+float dot(vector<double> &p, vector<double> &q)
 {
+	if(p.size() != q.size())return 0.0;
     float result = 0.0;
-    for (int i=1; i<K_NUM+1; ++i){
+    for (int i=1; i<p.size(); ++i){
         result += p[i]*q[i];
     }
     return result;
@@ -55,41 +56,44 @@ float dot(float p[], vector<float> &q)
  * load filePath中的数据到data这个vector中和 rateMatrix中
  * 
  */
-void loadRating(char * dirPath, map<int,int>* rateMatrixLocal)
+void loadRating(char * dirPath, vector<Rating> &data, map<int,int> rateMatrixLocal[USER_NUM+1])
 {
-    char rateStr[256];    
+    char rateStr[256];
+    DIR *dp;
+ 	struct dirent *dirp;
     vector<string> rateDetail(10);
+    vector<string> dayDetail(4);
+    if((dp  = opendir(dirPath)) == NULL) {
+        cout << "Error(" << errno << ") opening " << dirPath << endl;
+   		return;
+    } 
     int fileNum = 0;
-    std::ifstream from ("data.txt");
-    std::ofstream to("readlog.txt");
-    int itemId = 0;
-    while(from.getline(rateStr,256)){
-    	string strTemp(rateStr);
-	    int pos = strTemp.find(":");
-	    if(-1 != pos) {
-	    	itemId = atoi(strTemp.substr(0,pos).c_str());
-	    	if(0 == itemId ) {
-	    		cout<<strTemp<<"#####################"<<pos<<"####"<<strTemp.substr(0,pos).c_str()<<endl;
-	    		exit(1);
-	    	}		
-	    	 ++fileNum;	 
-	    	//cout<<itemId<<endl;
-	    	//exit(1);
-	    	if(fileNum %100 ==0)cout<<"read file "<<fileNum<<" sucessfully! max map:"<<endl;
-	    	continue;
+    while ((dirp = readdir(dp)) != NULL) {
+        if(string(dirp->d_name).length() < 3)continue;
+        string fileName = dirPath + string(dirp->d_name);
+        //cout <<fileName<<endl;
+        std::ifstream from (fileName.c_str());
+        string strTemp(dirp->d_name);
+	    int pos = strTemp.find(".");
+	    int itemId = atoi(strTemp.substr(0,pos).c_str());
+	    //cout<< itemId<<'\t'<<strTemp<<"   end"<<endl;
+	      
+        while(from.getline(rateStr,256)){
+	    	explode(",",rateStr,rateDetail);
+	        if(rateDetail.size()>=3){
+	        	int userId = atoi(rateDetail[0].c_str());
+	        	Rating aRate(itemId,userId,atoi(rateDetail[1].c_str()));
+	        	data.push_back(aRate);
+	        	//初始化rateMatrix
+	        	//rateMatrixLocal[userId][itemId] = atoi(rateDetail[1].c_str());
+	        }	        
 	    }
-    	explode(",",rateStr,rateDetail);
-        if(rateDetail.size()>=3){
-        	int userId = atoi(rateDetail[0].c_str());
-        	//初始化rateMatrix
-        	rateMatrixLocal[userId][itemId] = atoi(rateDetail[1].c_str());
-        	to<<userId<<'\t'<< itemId<<'\t'<<rateMatrixLocal[userId].size()<<endl;
-        }
-                
+	    from.close();
+	    ++fileNum;	 
+	    if(fileNum %100 ==0)cout<<"read file "<<fileNum<<" sucessfully!"<<endl;
     }
-    from.close();
-    to.close();
-   	cout<<"read file sucessfully!"<<endl;
+    //cout<<fileNum<<endl;
+    //exit(1);
     return;
 }
 
@@ -111,22 +115,23 @@ void explode(const char * probe,  const char * data ,vector<string> &result)
 /**
  * 计算全局的平均值
  */
-float setMeanRating(map<int,int> rateMatrixLocal[USER_NUM+1])
+double setMeanRating(vector<Rating> &data)
 {
     //计算平均值;
     double sum = 0;
     int num = 0;
-    map<int, int>::iterator  iter;
-    for(int i = 1; i < USER_NUM+1; ++i){
-		for(iter = rateMatrixLocal[i].begin(); iter != rateMatrixLocal[i].end(); ++iter) {
-			sum += iter->second;
-			++num;
-		}
+    int tmp = 0;
+    for(int i = 0; i < data.size(); ++i){
+    	tmp = data[i].value();
+    	if(data[i].value() > 0){
+    		sum += data[i].value();
+    		++num;
+    	}  			
     }
     return sum/num;
 }
 
-float get_rand()
+double get_rand()
 {
     return (rand()%1000-500)/5000.0;
 }
@@ -134,12 +139,12 @@ float get_rand()
 /**
  * setRand的值
  */
-float setRand(float  p[], int num, float base)
+float setRand(vector<double> &p, int num, float base)
 {
 	srand((unsigned)time(0));
-    for(int i=1;i<num;++i){
-    	float temp = base+get_rand();
-        p[i] = temp;
+    for(int i=0;i<num;++i){
+    	double temp = base+get_rand();
+        p.push_back(temp);
         //p.push_back(base+0.05); //全部初始化为base，看看影响如何
         //cout << i <<"	"<< temp <<"	"<< endl;
     }
@@ -148,24 +153,24 @@ float setRand(float  p[], int num, float base)
 
 
 
-void ratingProbe(const char * filePath, vector<Rating*> &data)
+void ratingProbe(const char * filePath, vector<Rating> &data)
 {
 
 }
 
-void saveRating(const char * filePath, vector<Rating*> &data)
+void saveRating(const char * filePath, vector<Rating> &data)
 {
 }
 
-void ratingQuiz(const char * filePath, vector<Rating*> &data)
+void ratingQuiz(const char * filePath, vector<Rating> &data)
 {
 }
 
 
 //下面的这个函数用来利用最小堆找出第k大的元素
-float getKmax(vector<float>& array, int K)
+double getKmax(vector<double>& array, int K)
 {
-	vector<float> heapTmp;
+	vector<double> heapTmp;
 	for(int i=0; i < array.size(); ++i)
 	{
 		heapTmp.push_back(array[i]);
@@ -182,13 +187,13 @@ float getKmax(vector<float>& array, int K)
 	return heapTmp.front();
 }
 
-bool cmp(float a, float b)
+bool cmp(double a, double b)
 {
 	return a > b;
 }
 
 //下面的几个函数用来实现快速排序
-void qsort(vector<float>& array, int start, int end)
+void qsort(vector<double>& array, int start, int end)
 {
     if(start >= end)return;
     //cout<<"begin partition:"<<endl;
@@ -198,12 +203,12 @@ void qsort(vector<float>& array, int start, int end)
     qsort(array,q+1,end);
 }
 
-int partition(vector<float>& array, int start,int end)
+int partition(vector<double>& array, int start,int end)
 {
     if(start >= end) return start;
     if(start < 0) start = 0;
     int original  = start;
-    float tmp = array[start];
+    double tmp = array[start];
     ++start;
     while(1) {
         while( start<=end && array[start] >= tmp)++start;
@@ -217,9 +222,9 @@ int partition(vector<float>& array, int start,int end)
     return start-1;
 }
 
-void swap(float& a, float& b)
+void swap(double& a, double& b)
 {
-    float tmp = a;
+    double tmp = a;
     a = b;
     b = tmp;
 }
