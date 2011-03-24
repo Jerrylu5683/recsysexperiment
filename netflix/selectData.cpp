@@ -52,7 +52,7 @@ int main()
         	if(userId > 0) {
         		if(userMap.find(userId) == userMap.end()) {
 					userMap[userId] = userCount;
-					++itemCount;
+					++userCount;
 				}
         	}
 	    }
@@ -75,12 +75,11 @@ int main()
         string strTemp(dirp->d_name);
 	    int pos = strTemp.find(".");
 	    int itemId = atoi(strTemp.substr(0,pos).c_str());
-	   
 	    result<<itemMap[itemId]<<":"<<'\n';
         while(from.getline(rateStr,256)){
         	explode(",",rateStr,rateDetail);
         	int userId = atoi(rateDetail[0].c_str());
-        	result<<userId<<','<<rateDetail[1]<<','<<rateDetail[2]<<'\n';
+        	result<<userMap[userId]<<','<<rateDetail[1]<<','<<rateDetail[2]<<'\n';
         	//cout<<rateStr<<'\n';
 	    }
 	    from.close();
