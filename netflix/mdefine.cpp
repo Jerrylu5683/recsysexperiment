@@ -80,10 +80,15 @@ void loadRating(char * dirPath, map<int,int>* rateMatrixLocal)
 	    }
     	explode(",",rateStr,rateDetail);
         if(rateDetail.size()>=3){
+        	
         	int userId = atoi(rateDetail[0].c_str());
+        	if(0 == itemId ) {
+	    		cout<<userId<<"#####################"<<endl;
+	    		exit(1);
+	    	}		
         	//初始化rateMatrix
         	rateMatrixLocal[userId][itemId] = atoi(rateDetail[1].c_str());
-        	to<<userId<<'\t'<< itemId<<'\t'<<rateMatrixLocal[userId].size()<<endl;
+        	//to<<userId<<'\t'<< itemId<<'\t'<<rateMatrixLocal[userId].size()<<endl;
         }
                 
     }
@@ -111,11 +116,12 @@ void explode(const char * probe,  const char * data ,vector<string> &result)
 /**
  * 计算全局的平均值
  */
-float setMeanRating(map<int,int> rateMatrixLocal[USER_NUM+1])
+float setMeanRating(map<int,int> rateMatrixLocal[])
 {
     //计算平均值;
     double sum = 0;
     int num = 0;
+    cout<<"beging mean:"<<endl;
     map<int, int>::iterator  iter;
     for(int i = 1; i < USER_NUM+1; ++i){
 		for(iter = rateMatrixLocal[i].begin(); iter != rateMatrixLocal[i].end(); ++iter) {
@@ -123,6 +129,7 @@ float setMeanRating(map<int,int> rateMatrixLocal[USER_NUM+1])
 			++num;
 		}
     }
+    cout<<"edn mean!"<<endl;
     return sum/num;
 }
 

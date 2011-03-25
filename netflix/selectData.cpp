@@ -13,7 +13,9 @@
 #include <map>
 #include <stdlib.h>
 #include <errno.h>
-#define ITEM_NUM 1000  //userNum:438212       itemNUm:1000
+//userNum:438212       itemNUm:1000
+//userNum:479025       itemNUm:10000
+#define ITEM_NUM 1000  
 #define DIR_PATH "../../../nf_dataset/transfer_set/"
 using namespace std;
 void explode(const char * probe,  const char * data ,vector<string> &result);

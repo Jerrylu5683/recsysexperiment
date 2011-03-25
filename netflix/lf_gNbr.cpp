@@ -23,7 +23,7 @@ namespace svd{
     
     float predictRate(int user,int item);
     
-    void model(int dim, float & alpha, float & beta)
+    void model(int dim, float  alpha, float  beta)
     {
         cout << "begin initialization: " << endl;
         ofstream log("log.txt");
@@ -32,38 +32,34 @@ namespace svd{
         loadRating(DIR_PATH,rateMatrix);  //初始化完成
         
         mean = setMeanRating(rateMatrix); //求平均值，求bu和bi的值
-        log<<"the mean value is:"<<mean<<endl;
         vector<float> pu(K_NUM+1,0);   //用于存储中间变量puk
         int i,u,j,k;
         
         //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
         //在计算的过程中必须要记得所有的值，包括所有的打分总数和分数总和
         map<int, int>::iterator  iter;
+        int tmpIndex = 0;
 	    for(int i = 1; i < USER_NUM+1; ++i){
-			for(iter = rateMatrix[i].begin(); iter != rateMatrix[i].end(); ++iter) {
-				bu[i] += iter->second;
-				++buNum[i];
-				bi[iter->first] += iter->second;
-        		++biNum[iter->first];
-			}
+	    	map<int, int>::iterator mapEnd = rateMatrix[i].end();
+			for(map<int, int>::iterator it = rateMatrix[i].begin(); it != mapEnd; it++) {
+				bu[i] += it->second;
+				buNum[i] += 1;
+				bi[it->first] += it->second;
+				biNum[it->first] += 1;
+        		
+			}			
 	    }
         
         //以下过程求平均值
         for(i = 1; i < USER_NUM+1; ++i) {
         	if(buNum[i]>=1)bu[i] = (bu[i]/buNum[i]) - mean;
         	else bu[i] = 0.0;
-        	cout<<i<<'\t'<<bu[i]<<'\t'<<buNum[i]<<'\t'<<mean<<endl;
-        	//log<<i<<'\t'<<bu[i]<<'\t'<<buNum[i]<<'\t'<<mean<<endl;
         }
-        log<<"line 57: bu[1]:"<<bu[1]<<endl;
         
         for(i = 1; i < ITEM_NUM+1; ++i) {
         	if(biNum[i] >=1)bi[i] = (bi[i]/biNum[i]) - mean;
         	else bi[i] = 0.0;
-        	cout<<i<<'\t'<<bi[i]<<'\t'<<biNum[i]<<'\t'<<mean<<endl;
-        	logbi<<i<<'\t'<<bi[i]<<'\t'<<biNum[i]<<'\t'<<mean<<endl;
         }
-        log<<"line 65: bu[1]:"<<bu[1]<<endl;
         //@todo 不知道是否能针对初始化的过程做一些优化
         //对w进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
         for(int i = 1; i < ITEM_NUM+1; ++i){
@@ -77,14 +73,12 @@ namespace svd{
         float pui = 0.0 ; // 预测的u对i的打分
         float preRmse = 1000000000000.0; //用于记录上一个rmse，作为终止条件的一种，如果rmse上升了，则停止
         float nowRmse = 0.0;
-        log<<"line 82: bu[1]:"<<bu[1]<<endl;
+        
         for(int step = 0; step < 35; ++step){  //只迭代35次
             float rmse = 0;
             float n = 0;
-            log<<"line 85 bu[1] in iteration step "<<step<<'\t'<<bu[1]<<endl;
             for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
                	int RuNum = rateMatrix[u].size(); //用户u打过分的item数目
-               	cout<<RuNum<<endl;
                	float sqrtRuNum = 0.0;
                	if(RuNum>1) sqrtRuNum = (1.0/sqrt(RuNum));
                	
@@ -93,7 +87,7 @@ namespace svd{
                		float sumx = 0.0;
                		float sumy = 0.0;
                		
-               		for(iter = rateMatrix[u].begin(); iter != rateMatrix[u].end(); ++iter) {
+               		for(iter = rateMatrix[u].begin(); iter != rateMatrix[u].end(); iter++) {
                			int itemI = iter->first;
                			float bui = mean + bu[u] + bi[itemI];
                			sumx += (rateMatrix[u][itemI]-bui) * x[itemI][k];
@@ -101,12 +95,10 @@ namespace svd{
                		}
                		pu[k] = sqrtRuNum*(sumx + sumy);
                	}
-               	log<<"line 85 bu[1] in iteration step "<<step<<" and in user "<<u<<"\t:"<<bu[1]<<endl;
                 for(iter = rateMatrix[u].begin(); iter != rateMatrix[u].end(); ++iter) {// 循环处理u打分过的每一个item
                 	int itemI = iter->first;
                 	double bui,rui;
                 	bui = mean + bu[u] + bi[itemI];
-                	if(u == 1)log<<"111*****************step:"<<step<<"	u:"<<u<<"	itemI:"<<itemI<<"	bu:"<<bu[u]<<"	bi[itemI]:"<<bi[itemI]<<endl;
                 	if(RuNum >1) {
                 		rui = bui + sqrtRuNum * dot(q[itemI],pu);
                 	}
@@ -116,14 +108,8 @@ namespace svd{
                 	if(pui > 5) pui = 5;
                 	
                 	float eui = rateMatrix[u][itemI] - rui;
-                	rmse += eui * eui; ++n;
-                	
-                	cout<<u<<'\t'<<itemI<<'\t'<<pui <<'\t'<<rateMatrix[u][itemI]<<'\t'<<bu[u]<<'\t'<< bi[itemI]<<'\t'<<sqrtRuNum;
-                	cout<<'\t'<<dot(q[itemI],pu)<<endl;
-                	
-                	log<<"before change:"<<bu[u]<<"		";
+                	rmse += eui * eui; ++n;                
                 	bu[u] += alpha * (eui - beta * bu[u]);
-                	log<<"bu u:"<<u<<" change:"<<bu[u]<<"	alpha:"<<alpha<<" eui:"<<eui<<"  beta:"<<beta<<endl;
                 	bi[itemI] += alpha * (eui - beta * bi[itemI]);
                 	
 	               	for( k=1; k< K_NUM+1; ++k) {
