@@ -9,11 +9,12 @@
 #include <algorithm>
 #include <ctime>
 #include <dirent.h>
+#include <malloc.h>
 #include <errno.h>
 
 #define USER_NUM 480189
 #define ITEM_NUM 17770
-#define K_NUM  60
+#define K_NUM  1
 #define DIR_PATH "../../nf_dataset/transfer_set/"
 
 class Rating

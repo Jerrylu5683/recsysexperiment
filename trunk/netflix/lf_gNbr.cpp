@@ -6,16 +6,16 @@
 
 namespace svd{
 	//使用一些全局变量，存储需要估计的参数，bu，bi,wij
-    double bu[USER_NUM+1] = {0};
-    double bi[ITEM_NUM+1] = {0};       //baseline预测器中的用户偏置和item偏置
-    int buNum[USER_NUM+1] = {0};	//用户u打分的item总数，
-    int biNum[ITEM_NUM+1] = {0};   //打过item i分的用户总数
+    //long bu[USER_NUM+1] = {0};
+    //long bi[ITEM_NUM+1] = {0};       //baseline预测器中的用户偏置和item偏置
+    //int buNum[USER_NUM+1] = {0};	//用户u打分的item总数，
+    //int biNum[ITEM_NUM+1] = {0};   //打过item i分的用户总数
     
-    float q[ITEM_NUM+1][K_NUM+1]; //Item向量
-    float x[ITEM_NUM+1][K_NUM+1]; //
-    float y[ITEM_NUM+1][K_NUM+1]; //
+    //float q[ITEM_NUM+1][K_NUM+1]; //Item向量
+    //float x[ITEM_NUM+1][K_NUM+1]; //
+    //float y[ITEM_NUM+1][K_NUM+1]; //
     
-    map<int,int> rateMatrix[USER_NUM+100];           //使用一个map数组存储稀疏的打分矩阵                     
+    vector <map<int,short> > rateMatrix(USER_NUM+1);           //使用一个map数组存储稀疏的打分矩阵                     
 	float mean = 0;                         //全局的平均值
     
     //函数声明
@@ -31,6 +31,7 @@ namespace svd{
         
         loadRating(DIR_PATH,rateMatrix);  //初始化完成
         
+         /*
         mean = setMeanRating(rateMatrix); //求平均值，求bu和bi的值
         vector<float> pu(K_NUM+1,0);   //用于存储中间变量puk
         int i,u,j,k;
@@ -74,6 +75,7 @@ namespace svd{
         float preRmse = 1000000000000.0; //用于记录上一个rmse，作为终止条件的一种，如果rmse上升了，则停止
         float nowRmse = 0.0;
         
+       
         for(int step = 0; step < 35; ++step){  //只迭代35次
             float rmse = 0;
             float n = 0;
@@ -127,6 +129,7 @@ namespace svd{
             //alpha *= 0.992;    //逐步减小学习速率
             //RMSEProbe(); 
         }
+        */
         //ratingAll(data);  //预测所有的结果
         log.close();
         logbi.close();
