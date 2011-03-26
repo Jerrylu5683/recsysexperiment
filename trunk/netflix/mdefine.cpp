@@ -22,14 +22,15 @@ short Rating::value()
     return rate;
 }
 
-float dot(float p[], vector<float> &q)
+float dot(float p[], float q[])
 {
-    float result = 0.0;
+    double result = 0.0;
     for (int i=1; i<K_NUM+1; ++i){
         result += p[i]*q[i];
     }
     return result;
 }
+
 void dump(map<int,short>& tmp,int fileNum)
 {
 	ofstream ret("/var/dump.txt");
@@ -48,12 +49,12 @@ void dump(map<int,short>& tmp,int fileNum)
  * load filePath中的数据到data这个vector中和 rateMatrix中
  * 
  */
-void loadRating(char * dirPath, vector< map<int,short> >& rateMatrixLocal)
+void loadRating(char * dirPath, vector< vector<rateNode> >& rateMatrixLocal)
 {
     char rateStr[256];    
     vector<string> rateDetail(10);
     int fileNum = 0;
-    std::ifstream from ("data.txt");
+    std::ifstream from ("smalldata_1000.txt");
     std::ofstream to("readlog.txt");
     int itemId = 0;
     string str1 = "";
@@ -75,9 +76,9 @@ void loadRating(char * dirPath, vector< map<int,short> >& rateMatrixLocal)
 	    	//cout<<itemId<<endl;
 	    	//exit(1);
 	    	if(fileNum %300 ==0) {
-	    		malloc_stats();  
-	    		mallinfo();
-	    		cout<<"read file "<<fileNum<<" sucessfully! max map:"<<endl;
+	    		//malloc_stats();  
+	    		//mallinfo();
+	    		cout<<"read file "<<fileNum<<" sucessfully!"<<endl;
 	    	}
 	    	continue;
 	    }
@@ -95,7 +96,10 @@ void loadRating(char * dirPath, vector< map<int,short> >& rateMatrixLocal)
     	}		
     	//初始化rateMatrix
     	try {
-    		rateMatrixLocal[userId][itemId] = (short)atoi(str2.c_str());
+    		rateNode tmpNode;
+    		tmpNode.item = itemId;
+    		tmpNode.rate = (short)atoi(str2.c_str());
+    		rateMatrixLocal[userId].push_back(tmpNode);
     		//cout<<sizeof(rateMatrixLocal[userId])<<endl;
     		//rateMatrixLocal[userId].insert(itemId,(short)atoi(str2.c_str()));
     		//to<<userId<<'\t'<< itemId<<'\t'<<rateMatrixLocal[userId].size()<<endl;
@@ -103,12 +107,6 @@ void loadRating(char * dirPath, vector< map<int,short> >& rateMatrixLocal)
     	catch (bad_alloc& ba)
     	{
     		cerr << "bad_alloc caught: " << ba.what() << endl;
-    		cerr << "bad_alloc caught: " << ba.what() << endl;
-    		//cout<<userId<<'\t'<<itemId<<'\t'<<strTemp<<endl;
-    		for(i=0;i<USER_NUM+1;i++) {
-    			totalM += sizeof(rateMatrixLocal[i]);	 	
-    		}
-    		cout<<"the total memory of the map is :"<<totalM<<endl;
     	}
     }
     from.close();
@@ -137,20 +135,19 @@ void explode(const char * probe,  const char * data ,vector<string> &result)
 /**
  * 计算全局的平均值
  */
-float setMeanRating(vector< map<int,short> > rateMatrixLocal)
+float setMeanRating(vector< vector<rateNode> > rateMatrixLocal)
 {
     //计算平均值;
     double sum = 0;
     int num = 0;
     cout<<"beging mean:"<<endl;
-    map<int,short>::iterator  iter;
     for(int i = 1; i < USER_NUM+1; ++i){
-		for(iter = rateMatrixLocal[i].begin(); iter != rateMatrixLocal[i].end(); ++iter) {
-			sum += iter->second;
+		for(int j=0; j < rateMatrixLocal[i].size(); ++j) {
+			sum += rateMatrixLocal[i][j].rate;
 			++num;
 		}
     }
-    cout<<"edn mean!"<<endl;
+    cout<<"end mean!mean:"<<(sum/num)<<endl;
     return sum/num;
 }
 
@@ -250,4 +247,15 @@ void swap(float& a, float& b)
     float tmp = a;
     a = b;
     b = tmp;
+}
+
+
+int getRate(vector<rateNode> &v, int item)
+{
+	int size = v.size();
+	for(int i = 0; i < size; ++i) {
+		if(item == v[i].item)return v[i].rate;
+	}
+	cout<<"**********************error!!!can't get whate you look for!!***********"<<endl;
+	return 0;
 }
