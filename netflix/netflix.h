@@ -12,9 +12,9 @@
 #include <malloc.h>
 #include <errno.h>
 
-#define USER_NUM 480189
-#define ITEM_NUM 17770
-#define K_NUM  1
+#define USER_NUM 438212 
+#define ITEM_NUM 1000
+#define K_NUM  30
 #define DIR_PATH "../../nf_dataset/transfer_set/"
 
 class Rating
@@ -36,4 +36,11 @@ class Rating
         //int   month();
     private:
         ;
+};
+
+
+struct rateNode
+{
+	int item;
+	short rate;
 };
