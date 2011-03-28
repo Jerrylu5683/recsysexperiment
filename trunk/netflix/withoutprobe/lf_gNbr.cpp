@@ -243,12 +243,13 @@ namespace svd{
 	    	pRate = predictRate(userId,itemId);
 	    	//pRate = rateValue;
 	    	err = pRate-rateValue;
+	    	//cout<<err<<"	"<<pRate<<"	"<<rateValue<<endl;
 	    	
 	    	rmse += err*err;++probeNum;
 	    }
 	    rmse = sqrt( rmse / probeNum);
 	    cout<<"RMSE:"<<rmse<<" probeNum:"<<probeNum<<endl;
-		in.close(); //load userId mapÍê±Ï
+		in.close(); //load userId map
     }
 	
     void ratingAll(vector< Rating*> & data){

@@ -55,7 +55,7 @@ void loadRating(char * dirPath, vector< vector<rateNode> >& rateMatrixLocal)
     vector<string> rateDetail(10);
     int fileNum = 0;
     //std::ifstream from ("smalldata_1000.txt");
-    std::ifstream from ("data.txt");
+    std::ifstream from ("data_without_prob.txt");
     std::ofstream to("readlog.txt");
     int itemId = 0;
     string str1 = "";
