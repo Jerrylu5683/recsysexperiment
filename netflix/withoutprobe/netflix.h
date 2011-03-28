@@ -16,7 +16,7 @@
 //#define ITEM_NUM 1000
 #define USER_NUM 480189 
 #define ITEM_NUM 17770
-#define K_NUM  30
+#define K_NUM  50
 #define DIR_PATH "../../nf_dataset/transfer_set/"
 
 class Rating
