@@ -59,6 +59,7 @@ namespace svd{
         		mi[i] += (*it).second;
         		++it;
         	}
+
         	if(rateMatrix[i].size() > 0)mi[i] = mi[i]/rateMatrix[i].size();
         	else mi[i] = mean;
         	//cout <<i<<'\t'<< mi[i]<<endl;//<<rateMatrix[i].size()

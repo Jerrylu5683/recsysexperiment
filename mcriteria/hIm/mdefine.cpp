@@ -81,7 +81,10 @@ void loadRating(char * dirPath,  map<int,int> rateMatrixLocal[USER_NUM+1][CRI_NU
 	        if(rateDetail.size()>=3){
 	        	for(int c = 0; c<rateDetail.size() && c < 8; ++c) {
 	        		//³õÊ¼»¯rateMatrix
-	        		rateMatrixLocal[userId][c+1][itemId] = atof(rateDetail[c].c_str());
+	        		double rate = atof(rateDetail[c].c_str());
+					if(-1 == rate) continue;
+					rateMatrixLocal[userId][c+1][itemId] = rate;
+					//cout<<userId<<"	"<<itemId<<"	"<<c+1<<"	"<<rateMatrixLocal[userId][c+1][itemId]<<endl;
 	        	}
 	        }
 	        
