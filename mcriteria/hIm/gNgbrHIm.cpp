@@ -33,7 +33,7 @@ namespace svd{
 	double cMatrix[ITEM_NUM+1][ITEM_NUM+1][CRI_NUM+1] = {0};  //隐含因子矩阵
 
     map<int,int> rateMatrix[USER_NUM+1][CRI_NUM+1];   //使用二维个map数组存储稀疏的打分矩阵，是否有更好的方法？？？
-	float mean = 0;                         //全局的平均值
+	double mean = 0;                         //全局的平均值
     
     //函数声明u
     void RMSEProbe(void);
@@ -125,7 +125,7 @@ namespace svd{
             double n = 0;
             
             for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
-                for( cIndex = 1; cIndex < CRI_NUM; ++cIndex) {
+                for( cIndex = 1; cIndex < CRI_NUM+1; ++cIndex) {
 					int ruNum = rateMatrix[u][cIndex].size();
 					//if(ruNum > 0)cout<<u<<"	"<<cIndex<<"	"<<ruNum<<endl;
 					double sqrtRuNum = sqrt(ruNum);
@@ -137,8 +137,8 @@ namespace svd{
 						int rui = it->second;
 						pui = predictRate(u,itemId,cIndex);
 						double eui = rui - pui;
-						if(eui >2 ) {
-							cout<<u<<"	"<<cIndex<<"	"<<itemId<<"	"<<rui<<"	";
+						if(eui >5 ) {
+							cout<<u<<"	"<<cIndex<<"	"<<itemId<<"	"<<rui<<"	mean:"<<mean<<"	";
 							cout<<pui<<'\t'<<rui<<"	"<<bu[u]<<"	"<<bi[itemId]<<"	"<<bc[cIndex]<<endl;
 							exit(1);
 						}
@@ -200,6 +200,7 @@ namespace svd{
     {
 		double bui = mean + bu[user] + bi[item] + bc[cri];
 		double ret = bui;
+		return bui;
 		double sqrtRuNum = 1/sqrt(rateMatrix[user][cri].size());
     	map<int,int>::iterator it;
 		map<int,int>::iterator end = svd::rateMatrix[user][cri].end();
