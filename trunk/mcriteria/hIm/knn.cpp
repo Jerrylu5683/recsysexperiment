@@ -122,7 +122,6 @@ namespace svd{
     }
     
     
-    
     //根据svd++公式预测打分值
     double rating(Rating  record){
         /*

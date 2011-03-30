@@ -7,6 +7,7 @@
     
     这里的数据id不是从1开始增加的，这个需要做一下调整，使其从1开始增加，一直到USER_NUM为止，这是所有处理的第一步
     这里采用的方法是php脚本处理，将所有原始数据处理一遍，进行变量替换
+	使用的代码在../replaceUserHotelId.php中，目前已经处理完毕，不过目前的情况是数据量太少
   
  */
 #include "tripadvisor.h"
@@ -17,77 +18,97 @@ namespace svd{
     vector<double> user(USER_NUM+1,0);   //用于存储原始Id
     vector<double> hotel(ITEM_NUM+1,0);
     
-    vector<double> bu(USER_NUM+1,0), bi(ITEM_NUM+1,0), bc();      //baseline预测器中的用户偏置和item偏置
+    double bu[USER_NUM+1] = {0}; 
+	double bi[ITEM_NUM+1] = {0};
+	double bc[CRI_NUM+1]  = {0};      //baseline预测器中的用户偏置,item偏置,criteria偏置
     vector<int> buNum(USER_NUM+1,0);	//用户u打分的item总数，
     vector<int> biNum(ITEM_NUM+1,0);   //打过item i分的用户总数
+    vector<int> bcNum(ITEM_NUM+1,0);   //在这个criteria打过分的用户总数
     
-    
-    vector< vector<double> > sim(ITEM_NUM+1);//用以存储从文件中读取的相似度
-    vector< vector<double> > w(ITEM_NUM+1);  //需要学习的item-item相似矩阵
-    vector< vector<double> > c(ITEM_NUM+1);  //item-item 隐性反馈的相似性关系
-    vector< vector<int> >  userItems(USER_NUM+1);   //用户打过分的items-----数组
-    //vector< vector <int> > rateMatrix(USER_NUM+1);  //打分矩阵,这个矩阵耗费了大量的内存，实际系统中必须优化，如何
-                                                    //优化呢？？？？？？---->已经通过了下面的一个map数组解决了
+    double wMatrix[ITEM_NUM+1][ITEM_NUM+1][CRI_NUM+1] = {0};  //需要学习的item-item相似矩阵
+	double cMatrix[ITEM_NUM+1][ITEM_NUM+1][CRI_NUM+1] = {0};  //隐含因子矩阵
+
     map<int,int> rateMatrix[USER_NUM+1][CRI_NUM+1];   //使用二维个map数组存储稀疏的打分矩阵，是否有更好的方法？？？
 	float mean = 0;                         //全局的平均值
     
-    //函数声明
+    //函数声明u
     void RMSEProbe(void);
     void  loadSim(char *fileName);
     void ratingAll(vector< Rating > & data);
     double rating(Rating  record);
-    double predictRate(int user,int item);
+    double predictRate(int user,int item, int cri);
     
     void model(int dim, double & alpha, double & beta)
     {
-        vector<Rating> data;
         cout << "begin initialization: " << endl;
         
-        loadRating("../../tripDataset_t/",data,rateMatrix);  //初始化完成
+        loadRating("../../tripDataset_t/",rateMatrix);  //load data
         
-        //目前先完全不考虑knn中的k的问题，利用所有的邻居
+        mean = setMeanRating(rateMatrix); //calculate the mean value
+		cout<<"mean:"<<mean<<endl;
+        int i,u,j,cIndex,k;
         
-        mean = setMeanRating(data); //求平均值，计算方法是一致的
-        int i,u,j,c,k;
-        
-        //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
-        //在计算的过程中必须要记得所有的值，包括所有的打分总数和分数总和
-        for(i = 0; i < data.size(); ++i){  //利用每一个打分调优结果
-           	bu[data[i].user] += data[i].rate;
-           	++buNum[data[i].user];
-        	bi[data[i].item] += data[i].rate;
-        	++biNum[data[i].item];
-        	
-        	userItems[data[i].user].push_back(data[i].item);//初始化userItems数组
-        } //以上过程相加求和（sigma）
-        
+		int itemId,rateValue;
+        //initialize the bi ,bu and bc, calculte the specific mean value and subtract the mean value
+		for( i = 1; i < USER_NUM+1; ++i) {
+			for( j = 1; j < CRI_NUM+1; ++j) {
+				//iteration the map
+				map<int,int>::iterator it;
+				map<int,int>::iterator end = rateMatrix[i][j].end();
+				for ( it=rateMatrix[i][j].begin() ; it != end; ++it) {
+					int itemId = it->first;
+					int rateValue = it->second;
+					/*
+					bu[i] += rateMatrix[i][j].rate;
+					buNum[i] += 1;
+					bi[rateMatrix[i][j].item] += rateMatrix[i][j].rate;
+					biNum[rateMatrix[i][j].item] += 1;
+					*/
+					bu[i] += rateValue;
+					++buNum[i];
+					bi[itemId] += rateValue;
+					++biNum[itemId];
+					bc[j] += rateValue;
+					++bcNum[j];
+				}
+			}  			
+		}
+
         //以下过程求平均值
         for(i = 1; i < USER_NUM+1; ++i) {
         	if(buNum[i]>1)bu[i] = bu[i]/buNum[i] - mean;
-        	else bu[i] = 0.05;
+        	else bu[i] = 0.0;
         }
+		cout<<"bu initialized end"<<endl;
         
         for(i = 1; i < ITEM_NUM+1; ++i) {
         	if(biNum[i] > 1)bi[i] = bi[i]/biNum[i] - mean;
-        	else bi[i] = 0.05;
+        	else bi[i] = 0.0;
         }
-        
-        //@todo 不知道是否能针对初始化的过程做一些优化
-        //对w进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
-        for(int i = 1; i < ITEM_NUM+1; ++i){
+
+		cout<<"bi initialized end"<<endl;
+        for(i = 1; i < CRI_NUM+1; ++i) {
+        	if(bcNum[i]>1)bc[i] = bc[i]/bcNum[i] - mean;
+        	else bc[i] = 0.0;
+        }
+        cout<<"bc initialized end"<<endl;
+
+        //initialize the wMatrix
+		for(i = 1; i < ITEM_NUM+1; ++i){
             //cout<< bu[i] << endl;
-            w[i].clear();            //清空所有的w[i]
-            setRand(w[i],ITEM_NUM+1,0);    //初始化w[i]
+			for(j = 1; j < ITEM_NUM+1; ++j){
+	            setRand(wMatrix[i][j],CRI_NUM+1,0);    //初始化w[i]
+			}
         }
-        
-        //@todo 不知道是否能针对初始化的过程做一些优化
-        //对c进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
-        for(int i = 1; i < ITEM_NUM+1; ++i){
-            //cout<< bu[i] << endl;
-            c[i].clear();            //清空所有的c[i]
-            setRand(c[i],ITEM_NUM+1,0);    //初始化c[i]
+		cout<<"wMatrix initialized end"<<endl;
+        //initialize the cMatrix        
+        for(i = 1; i < ITEM_NUM+1; ++i){
+			for(j = 1; j < ITEM_NUM+1; ++j){
+	            setRand(cMatrix[i][j],CRI_NUM+1,0);    //初始化c[i]
+			}
         }
-       
+        cout<<"cMatrix initialized end"<<endl; 
+		exit(1);
         cout <<"initialization end!"<<endl<< "begin iteration: " << endl;
         
         double pui = 0.0 ; // 预测的u对i的打分
@@ -98,36 +119,42 @@ namespace svd{
             double n = 0;
             
             for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
-                for(i = 0; i < userItems[u].size(); ++i) {
-                	//为预测u对i的打分做一些准备
-                	double sumBias = 0;
-                	
-                	//这里就是取前k个与i最相似的地方
-                	for(j=0; j < userItems[u].size(); ++j) {
-                		double buj = mean + bu[u] + bi[userItems[u][j]];
-                		double ruj = rateMatrix[u][userItems[u][j]];// u 对 j的打分如何快速获得呢？
-                		sumBias += (ruj - buj) * w[userItems[u][i]][userItems[u][j]] + c[userItems[u][i]][userItems[u][j]];
-                	}
-                	if( userItems[u].size() > 1)pui = mean + bu[u] + bi[userItems[u][i]] + (1.0/sqrt(userItems[u].size()))*sumBias;//这里先不对k进行变化，先取k=无穷大
-                	else pui = mean;
-                	if(pui < 1) pui = 1;
-                	if(pui > 5) pui = 5;
-                	//cout <<pui<<"	"<< rateMatrix[u][userItems[u][i]]<<endl;
-                	double eui = rateMatrix[u][userItems[u][i]] - pui;
-                	rmse += eui * eui; ++n;
-                	
-                	//更新bu，bi
-                	bu[u] += alpha * (eui - beta * bu[u]);
-                	bi[userItems[u][i]] += alpha * (eui - beta * bi[userItems[u][i]]);
-                	
-                	//更新wij
-                	//这里也是取前k个与i最相似的地方
-                	for(j=0; j < userItems[u].size(); ++j) {
-                		double buj = mean + bu[u] + bi[userItems[u][j]];
-                		w[userItems[u][i]][userItems[u][j]] += alpha * ( (1/sqrt(userItems[u].size())) * eui * (rateMatrix[u][userItems[u][j]] - buj) -  beta * w[userItems[u][i]][userItems[u][j]]);
-                		c[userItems[u][i]][userItems[u][j]] += alpha * ( (1/sqrt(userItems[u].size())) * eui - beta * c[userItems[u][i]][userItems[u][j]]);
-                	}	
-                } 
+                for( cIndex = 1; cIndex < CRI_NUM; ++cIndex) {
+					int ruNum = rateMatrix[i][cIndex].size();
+					double sqrtRuNum = sqrt(ruNum);
+					map<int,int>::iterator it;
+					map<int,int>::iterator end = rateMatrix[i][cIndex].end();
+					double sum = 0;
+					for ( it=rateMatrix[i][cIndex].begin() ; it != end; ++it) {
+						int itemId = it->first;
+						int rui = it->second;
+						double bui = mean+ bu[u] + bc[cIndex] + bi[itemId];
+						if( ruNum> 1)pui = predictRate(u,itemId,cIndex);
+						else pui = bui;
+						
+						cout<<pui<<'\t'<<rui<<"	"<<bu[u]<<"	"<<bi[itemId]<<"	"<<bc[cIndex]<<endl;
+						double eui = rui - pui;
+						rmse += eui * eui; ++n;
+						
+						//update bu，bi,bc
+						bu[u] += alpha * (eui - beta * bu[u]);
+						bi[itemId] += alpha * (eui - beta * bi[itemId]);
+						bc[cIndex] += alpha * (eui - beta * bc[cIndex]);
+						sum += eui;
+					}
+
+					// update wMatrix[i][j][cIndex] cMatrix[i][j][cIndex]
+					for ( it=rateMatrix[i][cIndex].begin() ; it != end; ++it) {
+						int itemi = it->first;
+						for(map<int,int>::iterator itj=rateMatrix[i][cIndex].begin(); itj != rateMatrix[i][cIndex].end(); ++itj) {
+							int itemj = itj->first;
+							double bujc = mean + bu[u] + bi[itemj] + bc[cIndex];
+							wMatrix[itemi][itemj][cIndex] += alpha *(sum * sqrtRuNum * (itj->second-bujc) - beta * wMatrix[itemi][itemj][cIndex]);
+							cMatrix[itemi][itemj][cIndex] += alpha *(sum * sqrtRuNum - beta * cMatrix[itemi][itemj][cIndex]);
+						}
+					} 
+				}
+
             }
             nowRmse =  sqrt(rmse / n);
             if( nowRmse >= preRmse && step > 5) break; //如果rmse已经开始上升了，则跳出循环
@@ -135,7 +162,7 @@ namespace svd{
             	preRmse = nowRmse;
             cout << step << "\t" << nowRmse << endl;
             //alpha *= 0.992;    //逐步减小学习速率
-            RMSEProbe(); 
+            //RMSEProbe(); 
         }
         //ratingAll(data);  //预测所有的结果
         
@@ -161,39 +188,29 @@ namespace svd{
 	    
     }
     
-    //根据svd++公式预测打分值
-    double rating(Rating  record){
-        /*
-        int user = record.user;
-        int item = record.item;
-        double ret = mean + bu[user] + bi[item] + dot(p[user], q[item]);
-        if(ret < 1) ret = 1;
-        if(ret > 5) ret = 5;
-        return ret;
-        */
-        return  0.0;
-    } 
-    
-    double predictRate(int user,int item)
+    double predictRate(int user,int item, int cri)
     {
-    	int u = user;
-    	int i =  item;
-    	double sumBias = 0.0;
-    	for(int j=0; j < userItems[u].size(); ++j) {
-    		double buj = mean + bu[u] + bi[userItems[u][j]];
-    		double ruj = rateMatrix[u][userItems[u][j]];// u 对 j的打分如何快速获得呢？
-    		sumBias += (ruj - buj) * w[i][userItems[u][j]] + c[i][userItems[u][j]];
-    	}
-    	double ret = 0.0;
-    	if(userItems[u].size()>1)
-    	{
-    		ret = mean + bu[u] + bi[i] + (1.0/sqrt(userItems[u].size())) * sumBias;//这里先不对k进行变化，先取k=无穷大
-    	}
-    	else ret  = mean;
-    	if(ret < 1.0) ret = 1;
-        if(ret > 5.0) ret = 5;
-        //cout <<u<<"	"<<i<<"	"<<mean <<"	"<<bu[u]<<"	"<<bi[i]<<"	"<<userItems[u].size()<<"	"<<sumBias<<"	"<<ret<<endl;
-        return ret;
+		double bui = mean + bu[user] + bi[item] + bc[cri];
+		double ret = bui;
+		double sqrtRuNum = 1/sqrt(rateMatrix[user][cri].size());
+    	map<int,int>::iterator it;
+		map<int,int>::iterator end = svd::rateMatrix[user][cri].end();
+		double sumw = 0.0;
+		double sumc = 0.0;
+
+		for ( it=rateMatrix[user][cri].begin() ; it != end; ++it) {
+			int itemId = it->first;
+			int ruj = it->second;
+			double buj = mean+ bu[user] + bc[cri] + bi[itemId];
+			sumw += (ruj-buj) * wMatrix[item][itemId][cri];
+			sumc += cMatrix[item][itemId][cri];
+		}
+		if(rateMatrix[user][cri].size()>=1) {
+			ret = bui + sqrtRuNum * (sumw+sumc);
+		}
+		if(ret > 5) ret = 5.0;
+		else if( ret < 1) ret = 1.0;
+		return ret;
     }
     
     //检查测试集情况
@@ -202,7 +219,7 @@ namespace svd{
         /*	1、load test数据集，
         	2、针对每一条数据，计算预测值，然后计算误差的平方和，计算总数量
         	3、输出rmse
-        */
+        
         std::ifstream from("../../mldataset/u1.test");
         char rateStr[100];
         vector<string> rateDetail(4);
@@ -221,12 +238,10 @@ namespace svd{
         	}
         }
         cout << "test set rmse:"<<sqrt(rmseSum/num) <<"	"<< rmseSum <<"	"<< num<< endl;
+		*/
     }
 
     void ratingAll(vector< Rating > & data){
-        for(int i = 0; i < data.size(); ++i){
-            data[i].setPredict(rating(data[i]));
-        }
     }
 };
 
