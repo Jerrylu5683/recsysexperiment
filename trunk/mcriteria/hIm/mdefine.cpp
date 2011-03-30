@@ -81,7 +81,7 @@ void loadRating(char * dirPath,  map<int,int> rateMatrixLocal[USER_NUM+1][CRI_NU
 	        if(rateDetail.size()>=3){
 	        	for(int c = 0; c<rateDetail.size() && c < 8; ++c) {
 	        		//初始化rateMatrix
-	        		double rate = atof(rateDetail[c].c_str());
+	        		int rate = atoi(rateDetail[c].c_str());
 					if(-1 == rate) continue;
 					rateMatrixLocal[userId][c+1][itemId] = rate;
 					//cout<<userId<<"	"<<itemId<<"	"<<c+1<<"	"<<rateMatrixLocal[userId][c+1][itemId]<<endl;
@@ -112,7 +112,7 @@ void explode(const char * probe,  char * data ,vector<string> &result)
 /**
  * 计算全局的平均值
  */
-int setMeanRating(map<int,int> rateMatrixLocal[USER_NUM+1][CRI_NUM+1])
+double setMeanRating(map<int,int> rateMatrixLocal[USER_NUM+1][CRI_NUM+1])
 {
     //计算平均值;
     long double sum = 0;
