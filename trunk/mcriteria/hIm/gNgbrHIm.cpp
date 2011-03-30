@@ -24,6 +24,10 @@ namespace svd{
     vector<int> buNum(USER_NUM+1,0);	//用户u打分的item总数，
     vector<int> biNum(ITEM_NUM+1,0);   //打过item i分的用户总数
     vector<int> bcNum(ITEM_NUM+1,0);   //在这个criteria打过分的用户总数
+
+	vector<double> buBase(USER_NUM+1,0);	//用户u打分的item总数，
+    vector<double> biBase(ITEM_NUM+1,0);   //打过item i分的用户总数
+    vector<double> bcBase(ITEM_NUM+1,0);   //在这个criteria打过分的用户总数
     
     double wMatrix[ITEM_NUM+1][ITEM_NUM+1][CRI_NUM+1] = {0};  //需要学习的item-item相似矩阵
 	double cMatrix[ITEM_NUM+1][ITEM_NUM+1][CRI_NUM+1] = {0};  //隐含因子矩阵
@@ -38,7 +42,7 @@ namespace svd{
     double rating(Rating  record);
     double predictRate(int user,int item, int cri);
     
-    void model(int dim, double & alpha, double & beta)
+    void model(int dim, double  alpha, double  beta)
     {
         cout << "begin initialization: " << endl;
         
@@ -78,18 +82,21 @@ namespace svd{
         for(i = 1; i < USER_NUM+1; ++i) {
         	if(buNum[i]>1)bu[i] = bu[i]/buNum[i] - mean;
         	else bu[i] = 0.0;
+			buBase[i] = bu[i];
         }
 		cout<<"bu initialized end"<<endl;
         
         for(i = 1; i < ITEM_NUM+1; ++i) {
         	if(biNum[i] > 1)bi[i] = bi[i]/biNum[i] - mean;
         	else bi[i] = 0.0;
+			biBase[i] = bi[i];
         }
 
 		cout<<"bi initialized end"<<endl;
         for(i = 1; i < CRI_NUM+1; ++i) {
         	if(bcNum[i]>1)bc[i] = bc[i]/bcNum[i] - mean;
         	else bc[i] = 0.0;
+			bcBase[i] = bc[i];
         }
         cout<<"bc initialized end"<<endl;
 
@@ -119,22 +126,23 @@ namespace svd{
             
             for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
                 for( cIndex = 1; cIndex < CRI_NUM; ++cIndex) {
-					int ruNum = rateMatrix[i][cIndex].size();
-					if(ruNum > 0)cout<<u<<"	"<<cIndex<<"	"<<ruNum<<endl;
+					int ruNum = rateMatrix[u][cIndex].size();
+					//if(ruNum > 0)cout<<u<<"	"<<cIndex<<"	"<<ruNum<<endl;
 					double sqrtRuNum = sqrt(ruNum);
 					map<int,int>::iterator it;
-					map<int,int>::iterator end = rateMatrix[i][cIndex].end();
+					map<int,int>::iterator end = rateMatrix[u][cIndex].end();
 					double sum = 0;
-					for ( it=rateMatrix[i][cIndex].begin() ; it != end; ++it) {
+					for ( it=rateMatrix[u][cIndex].begin() ; it != end; ++it) {
 						int itemId = it->first;
 						int rui = it->second;
-						double bui = mean+ bu[u] + bc[cIndex] + bi[itemId];
-						if( ruNum> 1)pui = predictRate(u,itemId,cIndex);
-						else pui = bui;
-						
-						cout<<pui<<'\t'<<rui<<"	"<<bu[u]<<"	"<<bi[itemId]<<"	"<<bc[cIndex]<<endl;
+						pui = predictRate(u,itemId,cIndex);
 						double eui = rui - pui;
-						rmse += eui * eui; ++n;
+						if(eui >2 ) {
+							cout<<u<<"	"<<cIndex<<"	"<<itemId<<"	"<<rui<<"	";
+							cout<<pui<<'\t'<<rui<<"	"<<bu[u]<<"	"<<bi[itemId]<<"	"<<bc[cIndex]<<endl;
+							exit(1);
+						}
+						rmse += eui * eui; ++n;  
 						
 						//update bu，bi,bc
 						bu[u] += alpha * (eui - beta * bu[u]);
@@ -144,11 +152,11 @@ namespace svd{
 					}
 
 					// update wMatrix[i][j][cIndex] cMatrix[i][j][cIndex]
-					for ( it=rateMatrix[i][cIndex].begin() ; it != end; ++it) {
+					for ( it=rateMatrix[u][cIndex].begin() ; it != end; ++it) {
 						int itemi = it->first;
-						for(map<int,int>::iterator itj=rateMatrix[i][cIndex].begin(); itj != rateMatrix[i][cIndex].end(); ++itj) {
+						for(map<int,int>::iterator itj=rateMatrix[u][cIndex].begin(); itj != rateMatrix[u][cIndex].end(); ++itj) {
 							int itemj = itj->first;
-							double bujc = mean + bu[u] + bi[itemj] + bc[cIndex];
+							double bujc = mean + buBase[u] + biBase[itemj] + bcBase[cIndex];
 							wMatrix[itemi][itemj][cIndex] += alpha *(sum * sqrtRuNum * (itj->second-bujc) - beta * wMatrix[itemi][itemj][cIndex]);
 							cMatrix[itemi][itemj][cIndex] += alpha *(sum * sqrtRuNum - beta * cMatrix[itemi][itemj][cIndex]);
 						}
@@ -157,7 +165,7 @@ namespace svd{
 
             }
             nowRmse =  sqrt(rmse / n);
-            if( nowRmse >= preRmse && step > 5) break; //如果rmse已经开始上升了，则跳出循环
+            if( nowRmse >= preRmse && step > 10) break; //如果rmse已经开始上升了，则跳出循环
             else
             	preRmse = nowRmse;
             cout << step << "\t" << nowRmse << endl;
@@ -249,8 +257,8 @@ int main(int argc, char ** argv)
 {
 	double start,end,duration; 
 	start = clock();
-    double alpha = 0.013;  //经测试这个值比较好
-    double beta = 0.001;   //经过测试这个也还行
+    double alpha = 0.005;  //经测试这个值比较好
+    double beta = 0.002;   //经过测试这个也还行
     int dim = 100;//atoi(argv[1]);
     test_level = 1;//atoi(argv[2]);
     ofstream outputfile("parameter.txt");
