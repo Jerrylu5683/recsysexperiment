@@ -108,7 +108,6 @@ namespace svd{
 			}
         }
         cout<<"cMatrix initialized end"<<endl; 
-		exit(1);
         cout <<"initialization end!"<<endl<< "begin iteration: " << endl;
         
         double pui = 0.0 ; // 预测的u对i的打分
@@ -121,6 +120,7 @@ namespace svd{
             for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
                 for( cIndex = 1; cIndex < CRI_NUM; ++cIndex) {
 					int ruNum = rateMatrix[i][cIndex].size();
+					if(ruNum > 0)cout<<u<<"	"<<cIndex<<"	"<<ruNum<<endl;
 					double sqrtRuNum = sqrt(ruNum);
 					map<int,int>::iterator it;
 					map<int,int>::iterator end = rateMatrix[i][cIndex].end();
