@@ -48,13 +48,14 @@ float dot(vector<float> &p, vector<float> &q)
  * load filePath中的数据到data这个vector中和 rateMatrix中
  * 这里要循环目录
  */
-void loadRating(char * dirPath, vector<Rating> &data, map<int,int> rateMatrixLocal[USER_NUM+1][CRI_NUM+1])
+void loadRating(char * dirPath,  map<int,int> rateMatrixLocal[USER_NUM+1][CRI_NUM+1])
 {
     char rateStr[256];
     DIR *dp;
  	struct dirent *dirp;
     vector<string> rateDetail(10);
-    if((dp  = opendir(dirPath)) == NULL) {
+	
+	if((dp  = opendir(dirPath)) == NULL) {
         cout << "Error(" << errno << ") opening " << dirPath << endl;
    		return;
     }
@@ -66,20 +67,21 @@ void loadRating(char * dirPath, vector<Rating> &data, map<int,int> rateMatrixLoc
         std::ifstream from (fileName.c_str());
         int itemId =  atoi(string(dirp->d_name).c_str());
         while(from.getline(rateStr,256)){
+			//strTemp: 
+			//971:5   5       5       5       5       4       4       4
+			//1271:3  3       2       3       4       4       4       3
+
 	    	string strTemp(rateStr);
 	    	int pos = strTemp.find(":");
-	    	string userId = strTemp.substr(0,pos-1);
-	    	
+	    	int userId = atoi(strTemp.substr(0,pos-1).c_str());
+
 	    	strcpy(rateStr,strTemp.substr(pos+1).c_str());
 	        explode("	",rateStr,rateDetail);
 	        
 	        if(rateDetail.size()>=3){
 	        	for(int c = 0; c<rateDetail.size() && c < 8; ++c) {
-	        		Rating aRate(itemId,atoi(userId.c_str()),c+1,atof(rateDetail[c].c_str()));
-					aRate.test = 0; //这里所有的数据都是训练数据，测试数据另外存储        	
-	        		data.push_back(aRate);
 	        		//初始化rateMatrix
-	        		rateMatrixLocal[atoi(userId.c_str())][c+1][itemId] = atof(rateDetail[c].c_str());
+	        		rateMatrixLocal[userId][c+1][itemId] = atof(rateDetail[c].c_str());
 	        	}
 	        }
 	        
@@ -107,17 +109,21 @@ void explode(const char * probe,  char * data ,vector<string> &result)
 /**
  * 计算全局的平均值
  */
-int setMeanRating(vector<Rating> &data)
+int setMeanRating(map<int,int> rateMatrixLocal[USER_NUM+1][CRI_NUM+1])
 {
     //计算平均值;
-    float sum = 0;
+    long double sum = 0;
     int num = 0;
     int tmp = 0;
-    for(int i = 0; i < data.size(); ++i){
-    	tmp = data[i].value();
-    	if(data[i].value() > 0){
-    		sum += data[i].value();
-    		++num;
+    for(int i = 1; i < USER_NUM+1; ++i) {
+		for(int j = 1; j < CRI_NUM+1; ++j) {
+			//iteration the map
+			map<int,int>::iterator it;
+			map<int,int>::iterator end = rateMatrixLocal[i][j].end();
+			for ( it=rateMatrixLocal[i][j].begin() ; it != end; ++it) {
+				sum +=  it->second;
+				++num;
+			}
     	}  			
     }
     return sum/num;
@@ -128,32 +134,11 @@ double get_rand()
     return (rand()%1000-500)/5000.0;
 }
 
-/**
- * setRand的值
- */
-float setRand(vector<double> &p, int num, float base)
+float setRand(double  p[], int num, float base)
 {
 	srand((unsigned)time(0));
-    for(int i=0;i<num;++i){
-    	double temp = base+get_rand();
-        p.push_back(temp);
-        //p.push_back(base+0.05); //全部初始化为base，看看影响如何
-        //cout << i <<"	"<< temp <<"	"<< endl;
+    for(int i=1;i<num;++i){
+    	float temp = base+get_rand();
+        p[i] = temp;
     }
-}
-
-
-
-
-void ratingProbe(const char * filePath, vector<Rating> &data)
-{
-
-}
-
-void saveRating(const char * filePath, vector<Rating> &data)
-{
-}
-
-void ratingQuiz(const char * filePath, vector<Rating> &data)
-{
 }
