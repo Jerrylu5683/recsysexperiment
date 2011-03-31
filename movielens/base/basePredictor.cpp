@@ -24,8 +24,6 @@ namespace svd{
     void model(int dim, float  alpha, float  beta)
     {
         cout << "begin initialization: " << endl;
-        ofstream log("log.txt");
-        ofstream logbi("log_bi.txt");
         
         loadRating(DIR_PATH,rateMatrix);  //初始化完成
         //getProbeReal();
@@ -113,9 +111,22 @@ namespace svd{
             //alpha *= 0.992;    //逐步减小学习速率
             //RMSEProbe(); 
         }
-        //ratingAll(data);  //预测所有的结果
-        log.close();
-        logbi.close();
+        
+        //输出bu的值
+        ofstream outputbu("bu.txt");
+	    for(int i=1; i < USER_NUM+1; i++)
+	    {
+	    	outputbu << i << "\t" << bu[i] << endl;
+	    }
+	    outputbu.close();
+	    
+	    //输出bi的值
+        ofstream outputbi("bi.txt");
+	    for(int i=1; i < ITEM_NUM+1; i++)
+	    {
+	    	outputbi << i << "\t"<< bi[i] << endl;
+	    }
+	    outputbi.close();
         RMSEProbe();  // 检查训练集情况
         return;
 	    
