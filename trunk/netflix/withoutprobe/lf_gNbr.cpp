@@ -38,8 +38,6 @@ namespace svd{
         //exit(0);
         
         mean = setMeanRating(rateMatrix); //求平均值，求bu和bi的值
-        
-        
 
         int i,u,j,k;
         
@@ -112,7 +110,6 @@ namespace svd{
             long double rmse = 0.0;
             int n = 0;
             for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
-        		float sum[K_NUM+1] = {0};   //用于存储中间变量sum
                	int RuNum = rateMatrix[u].size(); //用户u打过分的item数目
                	float sqrtRuNum = 0.0;
                	if(RuNum>1) sqrtRuNum = (1.0/sqrt(RuNum));
@@ -130,36 +127,19 @@ namespace svd{
                			sumy += y[itemI][k];
                		}
                		pu[u][k] = sqrtRuNum*(sumx + sumy);
-               		/*
-               		if(pu[k]>10) {
-               			//cout<<pu[k]<<endl;
-               			//cout<<pu[k]<<endl;
-               		}
-               		*/
                	}
-               	
-                //迭代处理
+
+               	float sum[K_NUM+1] = {0};   //用于存储中间变量sum
+                
+				//迭代处理
                 for(i=0; i < RuNum; ++i) {// 循环处理u打分过的每一个item
-                	int itemI = rateMatrix[u][i].item;
+					int itemI = rateMatrix[u][i].item;
                 	short rui = rateMatrix[u][i].rate; //实际的打分
                 	double bui = mean + bu[u] + bi[itemI];
-                	if(RuNum >1) {
-                		pui = bui + dot(q[itemI],pu[u]);
-                	}
-                	else pui = bui;
-                		
-                	if(pui < 1) pui = 1;
-                	if(pui > 5) pui = 5;
-                	
-                	//cout<<u<<'\t'<<i<<'\t'<<pui<<'\t'<<rui<<endl;
+					pui = predictRate(u,itemI);
                 	
                 	float eui = rui - pui;
-                	if( isnan(eui) ) {// fabs(eui) >= 4.2 || 
-                		cout<<u<<'\t'<<i<<'\t'<<pui<<'\t'<<rui<<"	"<<bu[u]<<"	"<<bi[itemI]<<"	"<<mean<<endl;
-                		printArray(q[itemI],pu[u],K_NUM+1);
-                		exit(1);
-                	}
-                	rmse += eui * eui; ++n;
+                   	rmse += eui * eui; ++n;
                 	if(n % 10000000 == 0)cout<<"step:"<<step<<"	n:"<<n<<" dealed!"<<endl;
                 	
                 	bu[u] += alpha * (eui - beta * bu[u]);
@@ -169,10 +149,16 @@ namespace svd{
 	               		sum[k] = sum[k]+ eui*q[itemI][k];
 	               		q[itemI][k] += alpha * (eui*pu[u][k] - beta*q[itemI][k]);
 	               	}
-                	
+				}
+                for(i=0; i < RuNum; ++i) {// 循环处理u打分过的每一个item
+					int itemI = rateMatrix[u][i].item;
+                	short rui = rateMatrix[u][i].rate; //实际的打分	
 	               	for( k=1; k< K_NUM+1; ++k) {
 	               		x[itemI][k] += alpha * (sqrtRuNum*sum[k]*(rui-mean-buBase[u]-biBase[itemI]) - beta*x[itemI][k]);
 	               		y[itemI][k] += alpha * (sqrtRuNum*sum[k] - beta*y[itemI][k]);
+						//x[itemI][k] += alpha * (eui*sqrtRuNum*q[itemI][k]*(rui-bui) - beta*x[itemI][k]);
+	               		//y[itemI][k] += alpha * (eui*sqrtRuNum*q[itemI][k] - beta*y[itemI][k]);
+
 	               	}
                 } 
             }
@@ -203,9 +189,8 @@ namespace svd{
     float predictRate(int user,int item)
     {
     	int RuNum = rateMatrix[user].size(); //用户u打过分的item数目
-       	float sqrtRuNum = 0.0;
        	float ret;
-    	if(RuNum>1)
+    	if(RuNum > 1)
     	{
     		ret = mean + bu[user] + bi[item] +  dot(pu[user],q[item]);//这里先不对k进行变化，先取k=无穷大
     	}
@@ -228,8 +213,7 @@ namespace svd{
 		char rateStr[256];
 		int pos1,pos2;
 		string strTemp;
-		int rateValue,itemId,userId;
-		int probeNum = 0;
+		int rateValue,itemId,userId,probeNum;
 		float pRate,err;
 		long double rmse = 0;
 		
@@ -240,12 +224,9 @@ namespace svd{
 	    	itemId = atoi(strTemp.substr(0,pos1).c_str());
 	    	userId = atoi(strTemp.substr(pos1+1,pos2-pos1-1).c_str());
 	    	rateValue = atoi(strTemp.substr(pos2+1).c_str());
-	    	
+
 	    	pRate = predictRate(userId,itemId);
-	    	//pRate = rateValue;
 	    	err = pRate-rateValue;
-	    	//cout<<err<<"	"<<pRate<<"	"<<rateValue<<endl;
-	    	
 	    	rmse += err*err;++probeNum;
 	    }
 	    rmse = sqrt( rmse / probeNum);
