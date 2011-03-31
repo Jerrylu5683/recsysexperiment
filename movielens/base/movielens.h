@@ -18,8 +18,9 @@
 #define ITEM_NUM 1682
 #define K_NUM  30
 #define DIR_PATH "../../nf_dataset/transfer_set/"
-#define PROBE_SET "../../ml_data/u1.test"
-#define TRAINING_SET "../../ml_data/u1.base"
+#define PROBE_SET "../../ml_data/u3.test"
+#define TRAINING_SET "../../ml_data/u3.base"
+
 
 class Rating
 {
