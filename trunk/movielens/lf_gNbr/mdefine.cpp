@@ -44,6 +44,28 @@ void dump(map<int,short>& tmp,int fileNum)
 	ret.close();
 }
 
+/**
+ *  将fileName中的数据 load 入 array a中
+ */
+void loadArray(float a[],char* fileName,int length)
+{
+	char rateStr[256];    
+	std::ifstream in(fileName,ifstream::in);
+	int i = 1;
+	int id,pos1;
+	double value;
+	while(in.getline(rateStr,256) && i < length) {
+		string strTemp(rateStr);
+    	if(strTemp.length() < 3)continue;
+    	pos1 = strTemp.find("	");
+    	id = atoi(strTemp.substr(0,pos1).c_str());
+    	value = atof(strTemp.substr(pos1+1).c_str());
+		a[id] = value;
+		++i;
+	}
+	in.close();
+}
+
 
 /**
  * load filePath中的数据到data这个vector中和 rateMatrix中
