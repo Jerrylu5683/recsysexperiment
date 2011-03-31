@@ -66,6 +66,9 @@ namespace svd{
         //对w进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
         for(int i = 1; i < ITEM_NUM+1; ++i){
             setRand(q[i],K_NUM+1,0);    //初始化q[i]
+        }
+        
+        for(int i = 1; i < USER_NUM+1; ++i){
             setRand(p[i],K_NUM+1,0);    //初始化p[i]
         }
        
