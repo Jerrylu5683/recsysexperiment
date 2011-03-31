@@ -39,8 +39,9 @@ namespace svd{
         
         mean = setMeanRating(rateMatrix); //求平均值，求bu和bi的值
         
+        loadArray(buBase,"bu.txt",USER_NUM+1);
+        loadArray(buBase,"bu.txt",ITEM_NUM+1);
         
-
         int i,u,j,k;
         
         //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
@@ -62,13 +63,13 @@ namespace svd{
         	if(buNum[i]>=1)bu[i] = (bu[i]/buNum[i]) - mean;
         	else bu[i] = 0.0;
         	//log<<i<<'\t'<<bu[i]<<endl;
-        	buBase[i] = bu[i];
+        	//buBase[i] = bu[i];
         }
         
         for(i = 1; i < ITEM_NUM+1; ++i) {
         	if(biNum[i] >=1)bi[i] = (bi[i]/biNum[i]) - mean;
         	else bi[i] = 0.0;
-        	biBase[i] = bi[i];
+        	//biBase[i] = bi[i];
         	//logbi<<i<<'\t'<<bi[i]<<endl;
         }
         //@todo 不知道是否能针对初始化的过程做一些优化
@@ -99,7 +100,7 @@ namespace svd{
            			int itemI = rateMatrix[u][j].item;
            			short rui =  rateMatrix[u][j].rate;
            			float bui = mean + bu[u] + bi[itemI];
-           			sumx += (rui-mean-bu[u]-bi[itemI]) * x[itemI][k];
+           			sumx += (rui-mean-buBase[u]-biBase[itemI]) * x[itemI][k];
            			sumy += y[itemI][k];
            		}
            		pu[u][k] = sqrtRuNum*(sumx + sumy);
@@ -112,7 +113,7 @@ namespace svd{
             long double rmse = 0.0;
             int n = 0;
             for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
-        		float sum[K_NUM+1] = {0};   //用于存储中间变量sum
+        		
                	int RuNum = rateMatrix[u].size(); //用户u打过分的item数目
                	float sqrtRuNum = 0.0;
                	if(RuNum>1) sqrtRuNum = (1.0/sqrt(RuNum));
@@ -126,7 +127,7 @@ namespace svd{
                			int itemI = rateMatrix[u][j].item;
                			short rui =  rateMatrix[u][j].rate;
                			float bui = mean + bu[u] + bi[itemI];
-               			sumx += (rui-mean-bu[u]-bi[itemI]) * x[itemI][k];
+               			sumx += (rui-mean-buBase[u]-biBase[itemI]) * x[itemI][k];
                			sumy += y[itemI][k];
                		}
                		pu[u][k] = sqrtRuNum*(sumx + sumy);
@@ -137,6 +138,7 @@ namespace svd{
                		}
                		*/
                	}
+               	float sum[K_NUM+1] = {0};   //用于存储中间变量sum
                	
                 //迭代处理
                 for(i=0; i < RuNum; ++i) {// 循环处理u打分过的每一个item
@@ -144,16 +146,6 @@ namespace svd{
                 	short rui = rateMatrix[u][i].rate; //实际的打分
                 	double bui = mean + bu[u] + bi[itemI];
                 	pui = predictRate(u,itemI);
-					/*
-					if(RuNum >1) {
-                		pui = bui + dot(q[itemI],pu[u]);
-                	}
-                	else pui = bui;
-                		
-                	if(pui < 1) pui = 1;
-                	if(pui > 5) pui = 5;
-					*/
-                	
                 	//cout<<u<<'\t'<<i<<'\t'<<pui<<'\t'<<rui<<endl;
                 	
                 	float eui = rui - pui;
@@ -162,6 +154,7 @@ namespace svd{
                 		printArray(q[itemI],pu[u],K_NUM+1);
                 		exit(1);
                 	}
+                	
                 	rmse += eui * eui; ++n;
                 	if(n % 10000000 == 0)cout<<"step:"<<step<<"	n:"<<n<<" dealed!"<<endl;
                 	
@@ -172,10 +165,14 @@ namespace svd{
 	               		sum[k] = sum[k]+ eui*q[itemI][k];
 	               		q[itemI][k] += alpha * (eui*pu[u][k] - beta*q[itemI][k]);
 	               	}
-                	
+                }
+                
+                for(i=0; i < RuNum; ++i) {// 循环处理u打分过的每一个item
+	                int itemI = rateMatrix[u][i].item;
+                	short rui = rateMatrix[u][i].rate; //实际的打分
 	               	for( k=1; k< K_NUM+1; ++k) {
 	               		
-						x[itemI][k] += alpha * (sqrtRuNum*sum[k]*(rui-mean-bu[u]-bi[itemI]) - beta*x[itemI][k]);
+						x[itemI][k] += alpha * (sqrtRuNum*sum[k]*(rui-mean-buBase[u]-biBase[itemI]) - beta*x[itemI][k]);
 	               		y[itemI][k] += alpha * (sqrtRuNum*sum[k] - beta*y[itemI][k]);
 						/*
 						x[itemI][k] += alpha * (eui*sqrtRuNum*q[itemI][k]*(rui-bui) - beta*x[itemI][k]);
