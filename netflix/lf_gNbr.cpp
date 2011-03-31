@@ -228,7 +228,8 @@ namespace svd{
 		char rateStr[256];
 		int pos1,pos2;
 		string strTemp;
-		int rateValue,itemId,userId,probeNum;
+		int rateValue,itemId,userId;
+		int probeNum = 0;
 		float pRate,err;
 		long double rmse = 0;
 		
