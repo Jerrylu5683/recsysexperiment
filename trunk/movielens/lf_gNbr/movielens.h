@@ -16,7 +16,7 @@
 //#define ITEM_NUM 1000
 #define USER_NUM 943 
 #define ITEM_NUM 1682
-#define K_NUM  30
+#define K_NUM  300
 #define DIR_PATH "../../nf_dataset/transfer_set/"
 #define PROBE_SET "../../ml_data/u1.test"
 #define TRAINING_SET "../../ml_data/u1.base"

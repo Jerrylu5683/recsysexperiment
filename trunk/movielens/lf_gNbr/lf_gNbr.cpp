@@ -108,7 +108,7 @@ namespace svd{
         cout <<"end compute first pu! " << endl;
         cout <<"begin testRMSEProbe(): " << endl;
         RMSEProbe();
-        for(int step = 0; step < 35; ++step){  //只迭代35次
+        for(int step = 0; step < 60; ++step){  //只迭代35次
             long double rmse = 0.0;
             int n = 0;
             for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
@@ -213,7 +213,7 @@ namespace svd{
     	int RuNum = rateMatrix[user].size(); //用户u打过分的item数目
        	float sqrtRuNum = 0.0;
        	float ret;
-    	if(0)
+    	if( RuNum >= 1)
     	{
     		ret = mean + bu[user] + bi[item] +  dot(pu[user],q[item]);//这里先不对k进行变化，先取k=无穷大
     	}
@@ -236,12 +236,13 @@ namespace svd{
 		char rateStr[256];
 		int pos1,pos2,pos3;
 		string strTemp;
-		int rateValue,itemId,userId,probeNum;
+		int rateValue,itemId,userId,probeNum=0;
 		float pRate,err;
 		long double rmse = 0;
 		
 		while(in.getline(rateStr,256)){
 	    	strTemp = rateStr;
+	    	if(strTemp.length() < 4) continue;
 		    pos1 = strTemp.find("	");
 		    pos2 = strTemp.find("	",pos1+1);
 		    pos3 = strTemp.find("	",pos2+1);
