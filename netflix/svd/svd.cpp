@@ -233,8 +233,8 @@ int main(int argc, char ** argv)
 {
 	float start,end,duration; 
 	start = clock();
-    float alpha = 0.001;  //经测试这个值比较好
-    float beta = 0.002;   //经过测试这个也还行
+    float alpha = 0.001;  //according the paper "a guide to SVD for CF"
+    float beta = 0.015;   //according the paper "a guide to SVD for CF"
     int dim = 100;//atoi(argv[1]);
     test_level = 1;//atoi(argv[2]);
     ofstream outputfile("parameter.txt");
