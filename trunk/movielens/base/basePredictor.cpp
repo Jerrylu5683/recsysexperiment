@@ -8,15 +8,9 @@ namespace svd{
 	//使用一些全局变量，存储需要估计的参数，bu，bi,wij
     double bu[USER_NUM+1] = {0};
     double bi[ITEM_NUM+1] = {0};       //baseline预测器中的用户偏置和item偏置
-    float buBase[USER_NUM+1] = {0};
-    float biBase[ITEM_NUM+1] = {0};       //baseline预测器中的用户偏置和item偏置
     int buNum[USER_NUM+1] = {0};	//用户u打分的item总数，
     int biNum[ITEM_NUM+1] = {0};   //打过item i分的用户总数
     
-    float pu[USER_NUM+1][K_NUM+1] = {0};   //用于存储中间变量puk
-    float q[ITEM_NUM+1][K_NUM+1]; //Item向量
-    float x[ITEM_NUM+1][K_NUM+1]; //
-    float y[ITEM_NUM+1][K_NUM+1]; //
     void getProbeReal();          //填充probe的实际打分
     
     vector < vector<rateNode> > rateMatrix(USER_NUM+1);           //使用一个map数组存储稀疏的打分矩阵                     
@@ -62,50 +56,20 @@ namespace svd{
         	if(buNum[i]>=1)bu[i] = (bu[i]/buNum[i]) - mean;
         	else bu[i] = 0.0;
         	//log<<i<<'\t'<<bu[i]<<endl;
-        	buBase[i] = bu[i];
         }
         
         for(i = 1; i < ITEM_NUM+1; ++i) {
         	if(biNum[i] >=1)bi[i] = (bi[i]/biNum[i]) - mean;
         	else bi[i] = 0.0;
-        	biBase[i] = bi[i];
         	//logbi<<i<<'\t'<<bi[i]<<endl;
         }
-        //@todo 不知道是否能针对初始化的过程做一些优化
-        //对w进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
-        for(int i = 1; i < ITEM_NUM+1; ++i){
-            setRand(q[i],K_NUM+1,0);    //初始化q[i]
-            setRand(x[i],K_NUM+1,0);    //初始化x[i]
-            setRand(y[i],K_NUM+1,0);    //初始化y[i]
-        }
-       
+        
         cout <<"initialization end!"<<endl<< "begin iteration: " << endl;
         
         float pui = 0.0 ; // 预测的u对i的打分
         double preRmse = 1000000000000.0; //用于记录上一个rmse，作为终止条件的一种，如果rmse上升了，则停止
         double nowRmse = 0.0;
-        cout <<"begin compute first pu: " << endl;
-        for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
-           	int RuNum = rateMatrix[u].size(); //用户u打过分的item数目
-           	float sqrtRuNum = 0.0;
-           	if(RuNum>1) sqrtRuNum = (1.0/sqrt(RuNum));
-           	
-           	//求出pu
-           	for( k=1; k< K_NUM+1; ++k) {
-           		float sumx = 0.0;
-           		float sumy = 0.0;
-           		
-           		for(j=0; j < RuNum; ++j) {
-           			int itemI = rateMatrix[u][j].item;
-           			short rui =  rateMatrix[u][j].rate;
-           			float bui = mean + bu[u] + bi[itemI];
-           			sumx += (rui-mean-bu[u]-bi[itemI]) * x[itemI][k];
-           			sumy += y[itemI][k];
-           		}
-           		pu[u][k] = sqrtRuNum*(sumx + sumy);
-           	}
-        }
-        cout <<"end compute first pu! " << endl;
+        
         cout <<"begin testRMSEProbe(): " << endl;
         RMSEProbe();
         for(int step = 0; step < 60; ++step){  //只迭代35次
@@ -117,49 +81,18 @@ namespace svd{
                	float sqrtRuNum = 0.0;
                	if(RuNum>1) sqrtRuNum = (1.0/sqrt(RuNum));
                	
-               	//求出pu
-               	for( k=1; k< K_NUM+1; ++k) {
-               		float sumx = 0.0;
-               		float sumy = 0.0;
-               		
-               		for(j=0; j < RuNum; ++j) {
-               			int itemI = rateMatrix[u][j].item;
-               			short rui =  rateMatrix[u][j].rate;
-               			float bui = mean + bu[u] + bi[itemI];
-               			sumx += (rui-mean-bu[u]-bi[itemI]) * x[itemI][k];
-               			sumy += y[itemI][k];
-               		}
-               		pu[u][k] = sqrtRuNum*(sumx + sumy);
-               		/*
-               		if(pu[k]>10) {
-               			//cout<<pu[k]<<endl;
-               			//cout<<pu[k]<<endl;
-               		}
-               		*/
-               	}
-               	
                 //迭代处理
                 for(i=0; i < RuNum; ++i) {// 循环处理u打分过的每一个item
                 	int itemI = rateMatrix[u][i].item;
                 	short rui = rateMatrix[u][i].rate; //实际的打分
                 	double bui = mean + bu[u] + bi[itemI];
                 	pui = predictRate(u,itemI);
-					/*
-					if(RuNum >1) {
-                		pui = bui + dot(q[itemI],pu[u]);
-                	}
-                	else pui = bui;
-                		
-                	if(pui < 1) pui = 1;
-                	if(pui > 5) pui = 5;
-					*/
-                	
+					
                 	//cout<<u<<'\t'<<i<<'\t'<<pui<<'\t'<<rui<<endl;
                 	
                 	float eui = rui - pui;
                 	if( isnan(eui) ) {// fabs(eui) >= 4.2 || 
                 		cout<<u<<'\t'<<i<<'\t'<<pui<<'\t'<<rui<<"	"<<bu[u]<<"	"<<bi[itemI]<<"	"<<mean<<endl;
-                		printArray(q[itemI],pu[u],K_NUM+1);
                 		exit(1);
                 	}
                 	rmse += eui * eui; ++n;
@@ -167,21 +100,6 @@ namespace svd{
                 	
                 	bu[u] += alpha * (eui - beta * bu[u]);
                 	bi[itemI] += alpha * (eui - beta * bi[itemI]);
-                	
-                	for( k=1; k< K_NUM+1; ++k) {
-	               		sum[k] = sum[k]+ eui*q[itemI][k];
-	               		q[itemI][k] += alpha * (eui*pu[u][k] - beta*q[itemI][k]);
-	               	}
-                	
-	               	for( k=1; k< K_NUM+1; ++k) {
-	               		
-						x[itemI][k] += alpha * (sqrtRuNum*sum[k]*(rui-mean-bu[u]-bi[itemI]) - beta*x[itemI][k]);
-	               		y[itemI][k] += alpha * (sqrtRuNum*sum[k] - beta*y[itemI][k]);
-						/*
-						x[itemI][k] += alpha * (eui*sqrtRuNum*q[itemI][k]*(rui-bui) - beta*x[itemI][k]);
-	               		y[itemI][k] += alpha * (eui*sqrtRuNum*q[itemI][k] - beta*y[itemI][k]);
-						*/
-	               	}
                 } 
             }
             nowRmse =  sqrt( rmse / n);
@@ -212,12 +130,7 @@ namespace svd{
     {
     	int RuNum = rateMatrix[user].size(); //用户u打过分的item数目
        	float sqrtRuNum = 0.0;
-       	float ret; 
-    	if(RuNum > 1)
-    	{
-    		ret = mean + bu[user] + bi[item] +  dot(pu[user],q[item]);//这里先不对k进行变化，先取k=无穷大
-    	}
-    	else ret  = mean+bu[user] + bi[item];
+       	float ret  = mean+bu[user] + bi[item];
     	if(ret < 1.0) ret = 1;
         if(ret > 5.0) ret = 5;
         return ret;
