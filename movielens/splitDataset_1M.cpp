@@ -67,7 +67,8 @@ int main()
     	//need to get three random num beteen 0 and (vSize-1)
     	get_rand(myset, 0, vSize-1, 3);
     	set<int>::iterator it;
-    	for (it=myset.begin(); it!=myset.end(); it++) {
+    	set<int>::iterator end = myset.end(); 
+    	for (it=myset.begin(); it!= end; ++it ) {
     		rateMatrix[i][*it].flag = 1;
     	}
 		for(int j=0; j < vSize; ++j) {
@@ -90,12 +91,13 @@ int main()
  */
 void get_rand(set<int> & myset, int low, int high,int length)
 {
+	srand((unsigned)time(0));
 	int num = 0;
+	set<int>::iterator end =  myset.end();
 	int good = high-low+1;
 	while (num < length) {
-		srand((unsigned)time(0));
 		int tmp = rand()%good+low;
-		if(myset.find(tmp) == myset.end()) {
+		if(myset.find(tmp) == end) {
 			myset.insert(tmp);
 			++num;
 		}
