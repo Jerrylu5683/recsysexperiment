@@ -65,6 +65,7 @@ int main()
     for(int i = 1; i < USER_NUM+1; ++i){
     	int vSize = rateMatrix[i].size();
     	//need to get three random num beteen 0 and (vSize-1)
+    	myset.clear();
     	get_rand(myset, 0, vSize-1, 3);
     	set<int>::iterator it;
     	set<int>::iterator end = myset.end(); 
