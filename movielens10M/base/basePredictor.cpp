@@ -1,21 +1,19 @@
 /**
- * 本程序的目的是实现koren在SIGKDD'08论文中的方法，svd model
+ * 本程序的目的是实现koren在TKDD'09论文中的方法，learnFactorizedNeighborhoodModel的方法
  */
 #include "movielens.h"
 #include "mdefine.cpp"
 
 namespace svd{
-	//使用一些全局变量，存储需要估计的参数，bu，bi,p,q
+	//使用一些全局变量，存储需要估计的参数，bu，bi,wij
     double bu[USER_NUM+1] = {0};
     double bi[ITEM_NUM+1] = {0};       //baseline预测器中的用户偏置和item偏置
-    
     int buNum[USER_NUM+1] = {0};	//用户u打分的item总数，
     int biNum[ITEM_NUM+1] = {0};   //打过item i分的用户总数
     
-    double p[USER_NUM+1][K_NUM+1] = {0};   //用于存储用户的属性描述p
-    double q[ITEM_NUM+1][K_NUM+1] = {0};   //用于item的属性描述q
+    void getProbeReal();          //填充probe的实际打分
     
-    vector < vector<rateNode> > rateMatrix(USER_NUM+1);           //使用一个vector数组存储稀疏的打分矩阵                     
+    vector < vector<rateNode> > rateMatrix(USER_NUM+1);           //使用一个map数组存储稀疏的打分矩阵                     
 	float mean = 0;                         //全局的平均值
     
     //函数声明
@@ -28,14 +26,16 @@ namespace svd{
         cout << "begin initialization: " << endl;
         
         loadRating(DIR_PATH,rateMatrix);  //初始化完成
-
+        //getProbeReal();
+        //exit(0);
         
         mean = setMeanRating(rateMatrix); //求平均值，求bu和bi的值
         
         
+
         int i,u,j,k;
         
-        //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
+         //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
         //在计算的过程中必须要记得所有的值，包括所有的打分总数和分数总和
         int tmpIndex = 0;
 	    for(i = 1; i < USER_NUM+1; ++i){
@@ -47,13 +47,11 @@ namespace svd{
 	    }
         
        
-        //ofstream logbi("bi.txt");
+        
         for(i = 1; i < ITEM_NUM+1; ++i) {
         	if(biNum[i] >=1)bi[i] = bi[i]/(biNum[i]+25);
         	else bi[i] = 0.0;
-        	
         }
-       
         
          for(i = 1; i < USER_NUM+1; ++i){
 	    	int vSize = rateMatrix[i].size();
@@ -68,21 +66,8 @@ namespace svd{
         for(i = 1; i < USER_NUM+1; ++i) {
         	if(buNum[i]>=1)bu[i] = bu[i]/(buNum[i]+10);
         	else bu[i] = 0.0;
-        	//logbi<<i<<"	"<<buNum[i]<<"	"<<bu[i]<<endl;
-        }
-        //logbi.close();
-        
-        
-        //@todo 不知道是否能针对初始化的过程做一些优化
-        //对w进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
-        for(int i = 1; i < ITEM_NUM+1; ++i){
-           setRand(q[i],K_NUM+1,0);    //初始化q[i]
         }
         
-        for(int i = 1; i < USER_NUM+1; ++i){
-           setRand(p[i],K_NUM+1,0);    //初始化p[i]
-        }
-       
         cout <<"initialization end!"<<endl<< "begin iteration: " << endl;
         
         float pui = 0.0 ; // 预测的u对i的打分
@@ -91,13 +76,11 @@ namespace svd{
         
         cout <<"begin testRMSEProbe(): " << endl;
         RMSEProbe();
-        
-        //main loop
-        for(int step = 0; step < 90; ++step){  //只迭代60次
+        for(int step = 0; step < 90; ++step){  //只迭代35次
             long double rmse = 0.0;
             int n = 0;
             for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
-            	
+        		float sum[K_NUM+1] = {0};   //用于存储中间变量sum
                	int RuNum = rateMatrix[u].size(); //用户u打过分的item数目
                	float sqrtRuNum = 0.0;
                	if(RuNum>1) sqrtRuNum = (1.0/sqrt(RuNum));
@@ -105,14 +88,15 @@ namespace svd{
                 //迭代处理
                 for(i=0; i < RuNum; ++i) {// 循环处理u打分过的每一个item
                 	int itemI = rateMatrix[u][i].item;
-                	short rui = rateMatrix[u][i].rate; //实际的打分
+                	float rui = rateMatrix[u][i].rate; //实际的打分
+                	double bui = mean + bu[u] + bi[itemI];
                 	pui = predictRate(u,itemI);
+					
+                	//cout<<u<<'\t'<<i<<'\t'<<pui<<'\t'<<rui<<endl;
                 	
                 	float eui = rui - pui;
-                	
                 	if( isnan(eui) ) {// fabs(eui) >= 4.2 || 
                 		cout<<u<<'\t'<<i<<'\t'<<pui<<'\t'<<rui<<"	"<<bu[u]<<"	"<<bi[itemI]<<"	"<<mean<<endl;
-                		//printArray(q[itemI],p[u],K_NUM+1);
                 		exit(1);
                 	}
                 	rmse += eui * eui; ++n;
@@ -120,12 +104,6 @@ namespace svd{
                 	
                 	bu[u] += alpha * (eui - beta * bu[u]);
                 	bi[itemI] += alpha * (eui - beta * bi[itemI]);
-                	
-                	for( k=1; k< K_NUM+1; ++k) {
-	               		double tempPu = p[u][k];
-	               		p[u][k] += alpha * (eui*q[itemI][k] - beta*p[u][k]);
-	               		q[itemI][k] += alpha * (eui*tempPu - beta*q[itemI][k]);
-	               	}
                 } 
             }
             nowRmse =  sqrt( rmse / n);
@@ -137,24 +115,35 @@ namespace svd{
             	preRmse = nowRmse;
             RMSEProbe();  // 检查训练集情况
             
-            alpha *= 0.999;    //逐步减小学习速率
+            //alpha *= 0.992;    //逐步减小学习速率
             //RMSEProbe(); 
         }
+        
+        //输出bu的值
+        ofstream outputbu("bu.txt");
+	    for(int i=1; i < USER_NUM+1; i++)
+	    {
+	    	outputbu << i << "\t" << bu[i] << endl;
+	    }
+	    outputbu.close();
+	    
+	    //输出bi的值
+        ofstream outputbi("bi.txt");
+	    for(int i=1; i < ITEM_NUM+1; i++)
+	    {
+	    	outputbi << i << "\t"<< bi[i] << endl;
+	    }
+	    outputbi.close();
         RMSEProbe();  // 检查训练集情况
-        return;    
+        return;
+	    
     }
     
-    //根据svd公式预测打分值
     float predictRate(int user,int item)
     {
     	int RuNum = rateMatrix[user].size(); //用户u打过分的item数目
        	float sqrtRuNum = 0.0;
-       	double ret; 
-    	if(RuNum > 1)
-    	{
-    		ret = mean + bu[user] + bi[item] +  dot(p[user],q[item]);//这里先不对k进行变化，先取k=无穷大
-    	}
-    	else ret  = mean+bu[user] + bi[item];
+       	float ret  = mean+bu[user] + bi[item];
     	if(ret < 1.0) ret = 1;
         if(ret > 5.0) ret = 5;
         return ret;
@@ -180,12 +169,12 @@ namespace svd{
 		while(in.getline(rateStr,256)){
 	    	strTemp = rateStr;
 	    	if(strTemp.length() < 4) continue;
-		    pos1 = strTemp.find("	");
-		    pos2 = strTemp.find("	",pos1+1);
-		    pos3 = strTemp.find("	",pos2+1);
+		    pos1 = strTemp.find("::");
+		    pos2 = strTemp.find("::",pos1+2);
+		    pos3 = strTemp.find("::",pos2+2);
 	    	userId = atoi(strTemp.substr(0,pos1).c_str());
-	    	itemId = atoi(strTemp.substr(pos1+1,pos2-pos1-1).c_str());
-	    	rateValue = atoi(strTemp.substr(pos2+1,pos3-pos2-1).c_str());
+	    	itemId = atoi(strTemp.substr(pos1+2,pos2-pos1-1).c_str());
+	    	rateValue = atoi(strTemp.substr(pos2+2,pos3-pos2-1).c_str());
 	    	
 	    	pRate = predictRate(userId,itemId);
 	    	err = pRate-rateValue;
@@ -202,18 +191,18 @@ int main(int argc, char ** argv)
 {
 	float start,end,duration; 
 	start = clock();
-    float alpha = 0.003;  //0.0045according to the paper of "a guide to SVD for CF"
-    float beta = 0.05;   //0.015 according to the paper of "a guide to SVD for CF"
-    					   //0.0005 according the experiment
+    float alpha = 0.0045;  //according to the paper of "a guide to SVD for CF"
+    float beta = 0.0005;   //according to the paper of "a guide to SVD for CF"
     int dim = 100;//atoi(argv[1]);
     test_level = 1;//atoi(argv[2]);
     ofstream outputfile("parameter.txt");
     
     //for(int i=0; i < 10; i++)
     {
-    	//alpha = i*0.0005 + 0.0025;
-    	//cout << alpha << endl;
-    	svd::model(dim,alpha,beta);	
+    //	beta = i*0.001 + 0.002;
+    //	cout << beta << endl;
+    	svd::model(dim,alpha,beta);
+    	
     }
     outputfile.close();
     end = clock();

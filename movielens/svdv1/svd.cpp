@@ -76,11 +76,11 @@ namespace svd{
         //@todo 不知道是否能针对初始化的过程做一些优化
         //对w进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
         for(int i = 1; i < ITEM_NUM+1; ++i){
-           setRand(q[i],K_NUM+1,0);    //初始化q[i]
+           setRand(q[i],K_NUM+1,mean);    //初始化q[i]
         }
         
         for(int i = 1; i < USER_NUM+1; ++i){
-           setRand(p[i],K_NUM+1,0);    //初始化p[i]
+           setRand(p[i],K_NUM+1,mean);    //初始化p[i]
         }
        
         cout <<"initialization end!"<<endl<< "begin iteration: " << endl;
@@ -122,9 +122,8 @@ namespace svd{
                 	bi[itemI] += alpha * (eui - beta * bi[itemI]);
                 	
                 	for( k=1; k< K_NUM+1; ++k) {
-	               		double tempPu = p[u][k];
 	               		p[u][k] += alpha * (eui*q[itemI][k] - beta*p[u][k]);
-	               		q[itemI][k] += alpha * (eui*tempPu - beta*q[itemI][k]);
+	               		q[itemI][k] += alpha * (eui*p[u][k] - beta*q[itemI][k]);
 	               	}
                 } 
             }
@@ -137,7 +136,7 @@ namespace svd{
             	preRmse = nowRmse;
             RMSEProbe();  // 检查训练集情况
             
-            alpha *= 0.999;    //逐步减小学习速率
+            //alpha *= 0.999;    //逐步减小学习速率
             //RMSEProbe(); 
         }
         RMSEProbe();  // 检查训练集情况
