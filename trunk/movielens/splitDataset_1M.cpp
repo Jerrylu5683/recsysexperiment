@@ -4,7 +4,7 @@
 #include <set>
 #include <math.h>
 #include <stdlib.h>
-#define  SOURCE "../ml1M_data/ratings.dat"
+#define  SOURCE "../ml1M_data/ratings_t.dat"
 #define USER_NUM 6040 
 #define ITEM_NUM 3592
 using namespace std;

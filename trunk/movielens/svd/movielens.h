@@ -14,12 +14,12 @@
 
 //#define USER_NUM 438212 
 //#define ITEM_NUM 1000
-#define USER_NUM 943 
-#define ITEM_NUM 1682
-#define K_NUM  30
+#define USER_NUM 6040  //10K:943 1M:6040
+#define ITEM_NUM 3706 //10K:1682 1M:3900
+#define K_NUM  100
 #define DIR_PATH "../../nf_dataset/transfer_set/"
-#define PROBE_SET "../../ml_data/u1.test"
-#define TRAINING_SET "../../ml_data/u1.base"
+#define PROBE_SET "../../ml_data/test.txt"
+#define TRAINING_SET "../../ml_data/training.txt"
 
 struct rateNode
 {
