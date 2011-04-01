@@ -35,31 +35,37 @@ namespace svd{
 
         int i,u,j,k;
         
-        //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
+         //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
         //在计算的过程中必须要记得所有的值，包括所有的打分总数和分数总和
         int tmpIndex = 0;
 	    for(i = 1; i < USER_NUM+1; ++i){
 	    	int vSize = rateMatrix[i].size();
 			for(j=0; j < vSize; ++j) {
-				bu[i] += rateMatrix[i][j].rate;
-				buNum[i] += 1;
-				bi[rateMatrix[i][j].item] += rateMatrix[i][j].rate;
+				bi[rateMatrix[i][j].item] += (rateMatrix[i][j].rate - mean);
 				biNum[rateMatrix[i][j].item] += 1;
-        		
 			}			
 	    }
         
-        //以下过程求平均值
-        for(i = 1; i < USER_NUM+1; ++i) {
-        	if(buNum[i]>=1)bu[i] = (bu[i]/buNum[i]) - mean;
-        	else bu[i] = 0.0;
-        	//log<<i<<'\t'<<bu[i]<<endl;
-        }
+       
         
         for(i = 1; i < ITEM_NUM+1; ++i) {
-        	if(biNum[i] >=1)bi[i] = (bi[i]/biNum[i]) - mean;
+        	if(biNum[i] >=1)bi[i] = bi[i]/(biNum[i]+25);
         	else bi[i] = 0.0;
-        	//logbi<<i<<'\t'<<bi[i]<<endl;
+        }
+        
+         for(i = 1; i < USER_NUM+1; ++i){
+	    	int vSize = rateMatrix[i].size();
+			for(j=0; j < vSize; ++j) {
+				bu[i] += (rateMatrix[i][j].rate - mean - bi[rateMatrix[i][j].item]);
+				buNum[i] += 1;
+			}			
+	    }
+        
+        
+         //以下过程求平均值
+        for(i = 1; i < USER_NUM+1; ++i) {
+        	if(buNum[i]>=1)bu[i] = bu[i]/(buNum[i]+10);
+        	else bu[i] = 0.0;
         }
         
         cout <<"initialization end!"<<endl<< "begin iteration: " << endl;
