@@ -47,11 +47,11 @@ namespace svd{
 	    }
         
        
-        //ofstream logbi("bi.txt");
+        ofstream logbi("bi.txt");
         for(i = 1; i < ITEM_NUM+1; ++i) {
         	if(biNum[i] >=1)bi[i] = bi[i]/(biNum[i]+25);
         	else bi[i] = 0.0;
-        	
+        	logbi<<i<<":"<<biNum[i]<<":"<<bi[i]<<endl;
         }
        
         
@@ -68,9 +68,9 @@ namespace svd{
         for(i = 1; i < USER_NUM+1; ++i) {
         	if(buNum[i]>=1)bu[i] = bu[i]/(buNum[i]+10);
         	else bu[i] = 0.0;
-        	//logbi<<i<<"	"<<buNum[i]<<"	"<<bu[i]<<endl;
+        	
         }
-        //logbi.close();
+        logbi.close();
         
         
         //@todo 不知道是否能针对初始化的过程做一些优化
@@ -105,7 +105,7 @@ namespace svd{
                 //迭代处理
                 for(i=0; i < RuNum; ++i) {// 循环处理u打分过的每一个item
                 	int itemI = rateMatrix[u][i].item;
-                	short rui = rateMatrix[u][i].rate; //实际的打分
+                	float rui = rateMatrix[u][i].rate; //实际的打分
                 	pui = predictRate(u,itemI);
                 	
                 	float eui = rui - pui;
@@ -122,9 +122,8 @@ namespace svd{
                 	bi[itemI] += alpha * (eui - beta * bi[itemI]);
                 	
                 	for( k=1; k< K_NUM+1; ++k) {
-	               		double tempPu = p[u][k];
 	               		p[u][k] += alpha * (eui*q[itemI][k] - beta*p[u][k]);
-	               		q[itemI][k] += alpha * (eui*tempPu - beta*q[itemI][k]);
+	               		q[itemI][k] += alpha * (eui*p[u][k] - beta*q[itemI][k]);
 	               	}
                 } 
             }
@@ -180,12 +179,12 @@ namespace svd{
 		while(in.getline(rateStr,256)){
 	    	strTemp = rateStr;
 	    	if(strTemp.length() < 4) continue;
-		    pos1 = strTemp.find("	");
-		    pos2 = strTemp.find("	",pos1+1);
-		    pos3 = strTemp.find("	",pos2+1);
+		    pos1 = strTemp.find("::");
+		    pos2 = strTemp.find("::",pos1+2);
+		    pos3 = strTemp.find("::",pos2+2);
 	    	userId = atoi(strTemp.substr(0,pos1).c_str());
-	    	itemId = atoi(strTemp.substr(pos1+1,pos2-pos1-1).c_str());
-	    	rateValue = atoi(strTemp.substr(pos2+1,pos3-pos2-1).c_str());
+	    	itemId = atoi(strTemp.substr(pos1+2,pos2-pos1-1).c_str());
+	    	rateValue = atoi(strTemp.substr(pos2+2,pos3-pos2-1).c_str());
 	    	
 	    	pRate = predictRate(userId,itemId);
 	    	err = pRate-rateValue;
