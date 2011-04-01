@@ -121,8 +121,9 @@ namespace svd{
                 	bi[itemI] += alpha * (eui - beta * bi[itemI]);
                 	
                 	for( k=1; k< K_NUM+1; ++k) {
+	               		double tempPu = p[u][k];
 	               		p[u][k] += alpha * (eui*q[itemI][k] - beta*p[u][k]);
-	               		q[itemI][k] += alpha * (eui*p[u][k] - beta*q[itemI][k]);
+	               		q[itemI][k] += alpha * (eui*tempPu - beta*q[itemI][k]);
 	               	}
                 } 
             }
@@ -240,7 +241,7 @@ namespace svd{
 
 int main(int argc, char ** argv)
 {
-	float start,end,duration; 
+	double start,end,duration; 
 	start = clock();
     float alpha = 0.001;  //according the paper "a guide to SVD for CF"
     float beta = 0.015;   //according the paper "a guide to SVD for CF"
@@ -255,7 +256,7 @@ int main(int argc, char ** argv)
     	svd::model(dim,alpha,beta);
     	
     }
-    outputfile.close();
+    outputfile.close(); 
     end = clock();
     duration = (end-start)/CLOCKS_PER_SEC;
     cout << "duration:"<<duration <<" s!" <<endl;
