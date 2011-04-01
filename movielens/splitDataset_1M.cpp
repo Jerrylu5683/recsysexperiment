@@ -14,6 +14,7 @@ struct rateNode
 {
 	short item;
 	short rate;
+	short flag;
 };
 
 
@@ -47,6 +48,7 @@ int main()
     		rateNode tmpNode;
     		tmpNode.item = itemId;
     		tmpNode.rate = (short)rate;
+    		tmpNode.flag = 0;
     		rateMatrix[userId].push_back(tmpNode);
     	}
     	catch (bad_alloc& ba)
@@ -64,11 +66,13 @@ int main()
     	int vSize = rateMatrix[i].size();
     	//need to get three random num beteen 0 and (vSize-1)
     	get_rand(myset, 0, vSize-1, 3);
-    	int testNum = 0;
+    	set<int>::iterator it;
+    	for (it=myset.begin(); it!=myset.end(); it++) {
+    		rateMatrix[i][*it].flag = 1;
+    	}
 		for(int j=0; j < vSize; ++j) {
-			if(testNum < 3 && myset.find(j) != myset.end()) { // in test set
+			if(rateMatrix[i][j].flag == 1) { // in test set
 				test << i<<"	"<<rateMatrix[i][j].item<<"	"<<rateMatrix[i][j].rate<<"	"<<0<<endl;
-				++testNum;
 			}
 			else {
 				training << i<<"	"<<rateMatrix[i][j].item<<"	"<<rateMatrix[i][j].rate<<"	"<<0<<endl;
