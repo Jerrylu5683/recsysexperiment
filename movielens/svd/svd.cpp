@@ -47,11 +47,13 @@ namespace svd{
 	    }
         
        
-        
+        //ofstream logbi("bi.txt");
         for(i = 1; i < ITEM_NUM+1; ++i) {
         	if(biNum[i] >=1)bi[i] = bi[i]/(biNum[i]+25);
         	else bi[i] = 0.0;
+        	
         }
+       
         
          for(i = 1; i < USER_NUM+1; ++i){
 	    	int vSize = rateMatrix[i].size();
@@ -66,7 +68,9 @@ namespace svd{
         for(i = 1; i < USER_NUM+1; ++i) {
         	if(buNum[i]>=1)bu[i] = bu[i]/(buNum[i]+10);
         	else bu[i] = 0.0;
+        	//logbi<<i<<"	"<<buNum[i]<<"	"<<bu[i]<<endl;
         }
+        //logbi.close();
         
         
         //@todo 不知道是否能针对初始化的过程做一些优化
@@ -197,8 +201,8 @@ int main(int argc, char ** argv)
 {
 	float start,end,duration; 
 	start = clock();
-    float alpha = 0.0045;  //according to the paper of "a guide to SVD for CF"
-    float beta = 0.0005;   //0.015 according to the paper of "a guide to SVD for CF"
+    float alpha = 0.003;  //0.0045according to the paper of "a guide to SVD for CF"
+    float beta = 0.05;   //0.015 according to the paper of "a guide to SVD for CF"
     					   //0.0005 according the experiment
     int dim = 100;//atoi(argv[1]);
     test_level = 1;//atoi(argv[2]);
