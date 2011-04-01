@@ -4,23 +4,6 @@ void explode(const char * probe,  const char * data ,vector<string> &result);
 void qsort(vector<float>& array, int start, int end);
 int  partition(vector<float>& array, int start, int end);
 bool cmp(float a, float b);
-Rating::Rating(short u_item,int u_user,short u_rate)//float u_rate,int year=1970,int month=1,int day=1)
-{
-    item = u_item;
-    user = u_user;
-    rate = u_rate;
-}
-
-
-void Rating::setPredict(int rating)
-{
-    rate = rating;
-}
-
-short Rating::value()
-{
-    return rate;
-}
 
 float dot(double* p, double* qLocal)
 {
@@ -179,23 +162,6 @@ void setRand(double  p[], int num, float base)
         //cout << i <<"	"<< temp <<"	"<< endl;
     }
 }
-
-
-
-
-void ratingProbe(const char * filePath, vector<Rating*> &data)
-{
-
-}
-
-void saveRating(const char * filePath, vector<Rating*> &data)
-{
-}
-
-void ratingQuiz(const char * filePath, vector<Rating*> &data)
-{
-}
-
 
 //下面的这个函数用来利用最小堆找出第k大的元素
 float getKmax(vector<float>& array, int K)

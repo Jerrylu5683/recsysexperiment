@@ -21,28 +21,6 @@
 #define PROBE_SET "../../ml_data/u1.test"
 #define TRAINING_SET "../../ml_data/u1.base"
 
-class Rating
-{
-    public:
-        Rating(short u_item,int u_user,short u_rate);//,int year,int month,int day);
-        short item;
-        int user;
-        short rate;
-        //int test;
-        //float real;
-        //double predict();
-        //int yearValue;
-        //int monthValue;
-        //int dayValue;
-        void setPredict(int rating);
-        short value();
-        //int   year();
-        //int   month();
-    private:
-        ;
-};
-
-
 struct rateNode
 {
 	short item;
