@@ -132,7 +132,7 @@ namespace svd{
             	preRmse = nowRmse;
             RMSEProbe();  // 检查训练集情况
             
-            alpha *= 0.999;    //逐步减小学习速率
+            //alpha *= 0.999;    //逐步减小学习速率
             //RMSEProbe(); 
         }
         RMSEProbe();  // 检查训练集情况
