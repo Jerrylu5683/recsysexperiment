@@ -91,7 +91,7 @@ int main()
 void get_rand(set<int> & myset, int low, int high,int length)
 {
 	int num = 0;
-	int good = low-high+1;
+	int good = high-low+1;
 	while (num < length) {
 		srand((unsigned)time(0));
 		int tmp = rand()%good+low;
