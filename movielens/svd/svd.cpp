@@ -44,7 +44,7 @@ namespace svd{
         int i,u,j,k;
         
        
-        /*
+        
         //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
         //在计算的过程中必须要记得所有的值，包括所有的打分总数和分数总和
         int tmpIndex = 0;
@@ -79,7 +79,7 @@ namespace svd{
         	//logbi<<i<<"	"<<buNum[i]<<"	"<<bu[i]<<endl;
         }
         //logbi.close();
-        */
+        
 
         //@todo 不知道是否能针对初始化的过程做一些优化
         //对w进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
@@ -127,8 +127,8 @@ namespace svd{
                 	rmse += eui * eui; ++n;
                 	if(n % 10000000 == 0)cout<<"step:"<<step<<"	n:"<<n<<" dealed!"<<endl;
                 	
-                	//bu[u] += alpha * (eui - beta * bu[u]);
-                	//bi[itemI] += alpha * (eui - beta * bi[itemI]);
+                	bu[u] += alpha * (eui - beta * bu[u]);
+                	bi[itemI] += alpha * (eui - beta * bi[itemI]);
                 	
                 	for( k=1; k< K_NUM+1; ++k) {
 	               		double tempPu = p[u][k];
@@ -142,12 +142,12 @@ namespace svd{
             cout << step << "\t" << nowRmse <<'\t'<< preRmse<<" 	n:"<<n<<endl;
             
             nowProbRmse = RMSEProbe(); // 检查训练集情况
-            if( nowRmse >= preRmse && step >= 3) break; //如果rmse已经开始上升了，则跳出循环
+            if( nowProbRmse >= preProbRmse && step >= 20) break; //如果rmse已经开始上升了，则跳出循环
             else
-            	preRmse = nowRmse;
+            	preProbRmse = nowProbRmse;
             
-            if(alpha > 0.01)alpha *= 0.9;    //逐步减小学习速率
-            else if( alpha > 0.003) alpha *= 0.999;
+            //if(alpha > 0.01)alpha *= 0.9;    //逐步减小学习速率
+            //else if( alpha > 0.003) alpha *= 0.999;
             //RMSEProbe(); 
         }
         RMSEProbe();  // 检查训练集情况
@@ -218,7 +218,7 @@ int main(int argc, char ** argv)
     double duration; 
 	start = time(NULL);
     float alpha = 0.01;  //0.0045according to the paper of "a guide to SVD for CF"
-    float beta = 0.05;   //0.015 according to the paper of "a guide to SVD for CF"
+    float beta = 0.015;   //0.015 according to the paper of "a guide to SVD for CF"
     					 //0.0005 according the experiment
     
     //for(int i=0; i < 10; i++)
