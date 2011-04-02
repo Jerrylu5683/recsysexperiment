@@ -29,7 +29,7 @@ namespace svd{
 	float mean = 0;                         //全局的平均值
     
     //函数声明
-    void RMSEProbe(void);
+    double RMSEProbe(void);
     
     float predictRate(int user,int item);
     
@@ -79,7 +79,7 @@ namespace svd{
         }
         //logbi.close();
         */
-        
+
         //@todo 不知道是否能针对初始化的过程做一些优化
         //对w进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
         for(int i = 1; i < ITEM_NUM+1; ++i){
@@ -93,14 +93,15 @@ namespace svd{
         cout <<"initialization end!"<<endl<< "begin iteration: " << endl;
         
         float pui = 0.0 ; // 预测的u对i的打分
-        double preRmse = 1000000000000.0; //用于记录上一个rmse，作为终止条件的一种，如果rmse上升了，则停止
+        double preRmse = 100000000.0;
+        double preProbRmse = RMSEProbe();//用于记录上一个rmse，作为终止条件的一种，如果rmse上升了，则停止u 
         double nowRmse = 0.0;
+        double nowProbRmse = 0.0;
         
         cout <<"begin testRMSEProbe(): " << endl;
-        RMSEProbe();
         
         //main loop
-        for(int step = 0; step < 90; ++step){  //只迭代60次
+        for(int step = 0; step < 290; ++step){  //只迭代60次
             long double rmse = 0.0;
             int n = 0;
             for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
@@ -137,15 +138,15 @@ namespace svd{
             }
             nowRmse =  sqrt( rmse / n);
             
-            cout << step << "\t" << nowRmse <<'\t'<< preRmse<<" 	n:"<<n<<endl;
+            //cout << step << "\t" << nowRmse <<'\t'<< preRmse<<" 	n:"<<n<<endl;
             
+            nowProbRmse = RMSEProbe(); // 检查训练集情况
             if( nowRmse >= preRmse && step >= 3) break; //如果rmse已经开始上升了，则跳出循环
             else
             	preRmse = nowRmse;
             
-            RMSEProbe();  // 检查训练集情况
-            
-            alpha *= 0.9;    //逐步减小学习速率
+            if(alpha > 0.01)alpha *= 0.9;    //逐步减小学习速率
+            else if( alpha > 0.003) alpha *= 0.999;
             //RMSEProbe(); 
         }
         RMSEProbe();  // 检查训练集情况
@@ -165,11 +166,12 @@ namespace svd{
     	else ret  = mean+bu[user] + bi[item];
     	if(ret < 1.0) ret = 1;
         if(ret > 5.0) ret = 5;
+        //cout<<ret<<"    "<<mean<<"    "<<bu[user]<<"     "<<bi[item]<<endl;
         return ret;
     }
     
     //检查测试集情况
-    void RMSEProbe(void){
+    double RMSEProbe(void){
     	
         /*	1、load test数据集，
         	2、针对每一条数据，计算预测值，然后计算误差的平方和，计算总数量
@@ -203,6 +205,7 @@ namespace svd{
 	    rmse = sqrt( rmse / probeNum);
 	    cout<<"RMSE:"<<rmse<<" probeNum:"<<probeNum<<endl;
 		in.close(); //load userId map完毕
+        return rmse;
     }
 };
 
@@ -213,17 +216,16 @@ int main(int argc, char ** argv)
     struct tm * timeEndInfo;
     double duration; 
 	start = time(NULL);
-    float alpha = 0.003;  //0.0045according to the paper of "a guide to SVD for CF"
-    float beta = 0.015;   //0.015 according to the paper of "a guide to SVD for CF"
+    float alpha = 0.01;  //0.0045according to the paper of "a guide to SVD for CF"
+    float beta = 0.05;   //0.015 according to the paper of "a guide to SVD for CF"
     					 //0.0005 according the experiment
     
     //for(int i=0; i < 10; i++)
     {
     	//alpha = i*0.0005 + 0.0025;
     	//cout << alpha << endl;
-    	svd::model(dim,alpha,beta);	
+    	svd::model(K_NUM,alpha,beta);	
     }
-    outputfile.close();
     end = time(NULL);
     duration = (end-start);
     timeStartInfo = localtime(&start);
