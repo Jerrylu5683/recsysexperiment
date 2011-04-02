@@ -23,7 +23,7 @@ namespace svd{
     
     float predictRate(int user,int item);
     
-    void model(int dim, float  alpha, float  beta)
+    void model(int dim, float  alpha1, float alpha2, float beta1, float beta2)
     {
         cout << "begin initialization: " << endl;
         ofstream log("log.txt");
@@ -117,13 +117,13 @@ namespace svd{
                 	rmse += eui * eui; ++n;
                 	if(n % 10000000 == 0)cout<<"step:"<<step<<"	n:"<<n<<" dealed!"<<endl;
                 	
-                	bu[u] += alpha * (eui - beta * bu[u]);
-                	bi[itemI] += alpha * (eui - beta * bi[itemI]);
+                	bu[u] += alpha1 * (eui - beta1 * bu[u]);
+                	bi[itemI] += alpha1 * (eui - beta1 * bi[itemI]);
                 	
                 	for( k=1; k< K_NUM+1; ++k) {
 	               		double tempPu = p[u][k];
-	               		p[u][k] += alpha * (eui*q[itemI][k] - beta*p[u][k]);
-	               		q[itemI][k] += alpha * (eui*tempPu - beta*q[itemI][k]);
+	               		p[u][k] += alpha2 * (eui*q[itemI][k] - beta2*p[u][k]);
+	               		q[itemI][k] += alpha2 * (eui*tempPu - beta2*q[itemI][k]);
 	               	}
                 } 
             }
@@ -243,8 +243,10 @@ int main(int argc, char ** argv)
 {
 	double start,end,duration; 
 	start = clock();
-    float alpha = 0.001;  //according the paper "a guide to SVD for CF"
-    float beta = 0.015;   //according the paper "a guide to SVD for CF"
+    float alpha1 = 0.007;  //according the paper of koren: Factorization Meets the Neighborhood: SIGKDD'08
+    float alpha2 = 0.007;    //according the paper of koren: Factorization Meets the Neighborhood: SIGKDD'08
+    float beta1  = 0.005;
+    float beta2  = 0.015;
     int dim = 100;//atoi(argv[1]);
     test_level = 1;//atoi(argv[2]);
     ofstream outputfile("parameter.txt");
@@ -253,7 +255,7 @@ int main(int argc, char ** argv)
     {
     //	beta = i*0.001 + 0.002;
     //	cout << beta << endl;
-    	svd::model(dim,alpha,beta);
+    	svd::model(dim,alpha1,alpha2,beta1,beta2);
     	
     }
     outputfile.close(); 
