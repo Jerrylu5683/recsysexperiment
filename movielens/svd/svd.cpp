@@ -43,6 +43,7 @@ namespace svd{
         
         int i,u,j,k;
         
+       
         /*
         //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
         //在计算的过程中必须要记得所有的值，包括所有的打分总数和分数总和
@@ -138,7 +139,7 @@ namespace svd{
             }
             nowRmse =  sqrt( rmse / n);
             
-            //cout << step << "\t" << nowRmse <<'\t'<< preRmse<<" 	n:"<<n<<endl;
+            cout << step << "\t" << nowRmse <<'\t'<< preRmse<<" 	n:"<<n<<endl;
             
             nowProbRmse = RMSEProbe(); // 检查训练集情况
             if( nowRmse >= preRmse && step >= 3) break; //如果rmse已经开始上升了，则跳出循环
