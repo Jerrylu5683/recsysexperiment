@@ -168,9 +168,9 @@ float setMeanRating(vector< vector<rateNode> > rateMatrixLocal)
     return sum/num;
 }
 
-double get_rand()
+double get_rand(int dim)
 {
-    return (rand()%1000-500)/50000.0;
+    return 0.1 * (rand()%1000/1000)/sqrt(dim);
 }
 
 /**
@@ -178,12 +178,9 @@ double get_rand()
  */
 void setRand(double  p[], int num, float base)
 {
-	srand((unsigned)time(0));
     for(int i=1;i<num;++i){
-    	double temp = base+get_rand();
+    	double temp = base+get_rand(num);
         p[i] = temp;
-        //p.push_back(base+0.05); //全部初始化为base，看看影响如何
-        //cout << i <<"	"<< temp <<"	"<< endl;
     }
 }
 

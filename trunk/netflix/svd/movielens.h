@@ -11,6 +11,7 @@
 #include <dirent.h>
 #include <malloc.h>
 #include <errno.h>
+#include <time.h>
 
 //#define USER_NUM 438212 
 //#define ITEM_NUM 1000
