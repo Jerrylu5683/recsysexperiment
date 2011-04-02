@@ -1,9 +1,16 @@
-float test_level = 0.004;
-using namespace std;
-void explode(const char * probe,  const char * data ,vector<string> &result);
-void qsort(vector<float>& array, int start, int end);
-int  partition(vector<float>& array, int start, int end);
-bool cmp(float a, float b);
+/* This file is Copyright (C) 2011 Lv Hongliang. All Rights Reserved.
+ * please maitain the copyright information completely when you redistribute the code.
+ * 
+ * Please contact me via email honglianglv@gmail.com
+ * my blog: http://lifecrunch.biz
+ * my twitter: http://twitter.com/honglianglv
+ *
+ * It is free software; you can redistribute it and/or modify it under 
+ * the GNU General Public License as published by the Free Software
+ * Foundation; either version 1, or (at your option) any later version.
+ */
+#ifndef MOVIELENS_SVD_MDEFINE_CPP_
+#define MOVIELENS_SVD_MDEFINE_CPP_
 
 float dot(double* p, double* qLocal)
 {
@@ -12,19 +19,6 @@ float dot(double* p, double* qLocal)
         result += p[i]*qLocal[i];
     }
     return result;
-}
-
-void dump(map<int,short>& tmp,int fileNum)
-{
-	ofstream ret("/var/dump.txt");
-	map<int,short>::iterator mapEnd = tmp.end();
-	for(map<int,short>::iterator it = tmp.begin(); it != mapEnd; it++) {
-		ret<<'['<<it->first<<']'<<" = "<< it->second<<endl;
-		if(it->first == fileNum) {
-			cout<<'['<<it->first<<']'<<" = "<< it->second<<endl;
-		} 
-	}
-	ret.close();
 }
 
 /**
@@ -63,7 +57,7 @@ void loadRating(char * dirPath, vector< vector<rateNode> >& rateMatrixLocal)
     std::ifstream from (TRAINING_SET);
     if (!from.is_open())
   	{
-    	cout << "Output operation failed!\n";
+    	cout << "can't open input file!\n";
     	exit(1);
   	}
     
@@ -93,9 +87,6 @@ void loadRating(char * dirPath, vector< vector<rateNode> >& rateMatrixLocal)
     		tmpNode.item = itemId;
     		tmpNode.rate = (short)rate;
     		rateMatrixLocal[userId].push_back(tmpNode);
-    		//cout<<sizeof(rateMatrixLocal[userId])<<endl;
-    		//rateMatrixLocal[userId].insert(itemId,(short)atoi(str2.c_str()));
-    		//to<<userId<<'\t'<< itemId<<'\t'<<rateMatrixLocal[userId].size()<<endl;
     	}
     	catch (bad_alloc& ba)
     	{
@@ -107,23 +98,6 @@ void loadRating(char * dirPath, vector< vector<rateNode> >& rateMatrixLocal)
    	cout<<"read file sucessfully!"<<endl;
     return;
 }
-
-/*
-void explode(const char * probe,  const char * data ,vector<string> &result)
-{
-    string dataStr(data);
-    int pos1 = 0;
-    int pos2 = 0;
-    int i=0;
-    while((pos2=dataStr.find(probe,pos1)) != string::npos){
-        result[i] = (dataStr.substr(pos1,pos2-pos1));
-        ++i;
-        //if(i>=3)break;
-        pos1=pos2+1;
-    }
-    result[i] = (dataStr.substr(pos1));
-}
-*/
 
 /**
  * 计算全局的平均值
@@ -144,9 +118,9 @@ float setMeanRating(vector< vector<rateNode> > rateMatrixLocal)
     return sum/num;
 }
 
-double get_rand()
+double get_rand(int dim)
 {
-    return (rand()%1000-500)/50000.0;
+    return 0.1 * (rand()%10000)/(10000.0 * sqrt(dim));
 }
 
 /**
@@ -155,90 +129,10 @@ double get_rand()
 void setRand(double  p[], int num, float base)
 {
 	srand((unsigned)time(0));
-    for(int i=1;i<num;++i){
-    	double temp = base+get_rand();
+    for(int i=1;i<num+1;++i){
+    	double temp = base+get_rand(num);
         p[i] = temp;
-        //p.push_back(base+0.05); //全部初始化为base，看看影响如何
-        //cout << i <<"	"<< temp <<"	"<< endl;
     }
 }
 
-//下面的这个函数用来利用最小堆找出第k大的元素
-float getKmax(vector<float>& array, int K)
-{
-	vector<float> heapTmp;
-	for(int i=0; i < array.size(); ++i)
-	{
-		heapTmp.push_back(array[i]);
-		if(i == K-1) {
-			make_heap(heapTmp.begin(),heapTmp.end(),cmp);
-		}
-		else if(i >=K) {
-			push_heap(heapTmp.begin(),heapTmp.end(),cmp);
-			pop_heap(heapTmp.begin(),heapTmp.end(),cmp);
-			heapTmp.pop_back();
-		}
-		//cout << i<<'\t'<<heapTmp.size()<<endl;
-	}
-	return heapTmp.front();
-}
-
-bool cmp(float a, float b)
-{
-	return a > b;
-}
-
-//下面的几个函数用来实现快速排序
-void qsort(vector<float>& array, int start, int end)
-{
-    if(start >= end)return;
-    //cout<<"begin partition:"<<endl;
-    int q = partition(array,start,end);
-    //cout<< q<<endl;
-    qsort(array,start,q-1);
-    qsort(array,q+1,end);
-}
-
-int partition(vector<float>& array, int start,int end)
-{
-    if(start >= end) return start;
-    if(start < 0) start = 0;
-    int original  = start;
-    float tmp = array[start];
-    ++start;
-    while(1) {
-        while( start<=end && array[start] >= tmp)++start;
-        while( start<=end && array[end] < tmp)--end;
-        if(start < end) {
-        	swap(array[start],array[end]);
-        }
-        else break;
-    }
-    swap(array[start-1],array[original]);
-    return start-1;
-}
-
-void swap(float& a, float& b)
-{
-    float tmp = a;
-    a = b;
-    b = tmp;
-}
-
-
-int getRate(vector<rateNode> &v, int item)
-{
-	int size = v.size();
-	for(int i = 0; i < size; ++i) {
-		if(item == v[i].item)return v[i].rate;
-	}
-	cout<<"**********************error!!!can't get whate you look for!!***********"<<endl;
-	return 0;
-}
-
-void printArray(float a[],float b[],int length)
-{
-	for(int i=1;i<length;++i) {
-		cout<<a[i]<<'\t'<<b[i]<<endl;
-	}
-}
+#endif // MOVIELENS_SVD_MDEFINE_CPP_

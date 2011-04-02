@@ -1,4 +1,14 @@
-/**
+/* This file is Copyright (C) 2011 Lv Hongliang. All Rights Reserved.
+ * please maitain the copyright information completely when you redistribute the code.
+ * 
+ * Please contact me via email honglianglv@gmail.com
+ * my blog: http://lifecrunch.biz
+ * my twitter: http://twitter.com/honglianglv
+ *
+ * It is free software; you can redistribute it and/or modify it under 
+ * the GNU General Public License as published by the Free Software
+ * Foundation; either version 1, or (at your option) any later version.
+ *
  * 本程序的目的是实现koren在SIGKDD'08论文中的方法，svd model
  */
 #include "movielens.h"
@@ -29,12 +39,11 @@ namespace svd{
         
         loadRating(DIR_PATH,rateMatrix);  //初始化完成
 
-        
         mean = setMeanRating(rateMatrix); //求平均值，求bu和bi的值
-        
         
         int i,u,j,k;
         
+        /*
         //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
         //在计算的过程中必须要记得所有的值，包括所有的打分总数和分数总和
         int tmpIndex = 0;
@@ -54,15 +63,13 @@ namespace svd{
         	
         }
        
-        
          for(i = 1; i < USER_NUM+1; ++i){
 	    	int vSize = rateMatrix[i].size();
 			for(j=0; j < vSize; ++j) {
 				bu[i] += (rateMatrix[i][j].rate - mean - bi[rateMatrix[i][j].item]);
 				buNum[i] += 1;
 			}			
-	    }
-        
+	    }        
         
          //以下过程求平均值
         for(i = 1; i < USER_NUM+1; ++i) {
@@ -71,16 +78,16 @@ namespace svd{
         	//logbi<<i<<"	"<<buNum[i]<<"	"<<bu[i]<<endl;
         }
         //logbi.close();
-        
+        */
         
         //@todo 不知道是否能针对初始化的过程做一些优化
         //对w进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
         for(int i = 1; i < ITEM_NUM+1; ++i){
-           setRand(q[i],K_NUM+1,0);    //初始化q[i]
+           setRand(q[i],K_NUM,0);    //初始化q[i]
         }
         
         for(int i = 1; i < USER_NUM+1; ++i){
-           setRand(p[i],K_NUM+1,0);    //初始化p[i]
+           setRand(p[i],K_NUM,0);    //初始化p[i]
         }
        
         cout <<"initialization end!"<<endl<< "begin iteration: " << endl;
@@ -118,8 +125,8 @@ namespace svd{
                 	rmse += eui * eui; ++n;
                 	if(n % 10000000 == 0)cout<<"step:"<<step<<"	n:"<<n<<" dealed!"<<endl;
                 	
-                	bu[u] += alpha * (eui - beta * bu[u]);
-                	bi[itemI] += alpha * (eui - beta * bi[itemI]);
+                	//bu[u] += alpha * (eui - beta * bu[u]);
+                	//bi[itemI] += alpha * (eui - beta * bi[itemI]);
                 	
                 	for( k=1; k< K_NUM+1; ++k) {
 	               		double tempPu = p[u][k];
@@ -135,9 +142,10 @@ namespace svd{
             if( nowRmse >= preRmse && step >= 3) break; //如果rmse已经开始上升了，则跳出循环
             else
             	preRmse = nowRmse;
+            
             RMSEProbe();  // 检查训练集情况
             
-            alpha *= 0.999;    //逐步减小学习速率
+            alpha *= 0.9;    //逐步减小学习速率
             //RMSEProbe(); 
         }
         RMSEProbe();  // 检查训练集情况
@@ -200,14 +208,14 @@ namespace svd{
 
 int main(int argc, char ** argv)
 {
-	float start,end,duration; 
-	start = clock();
+	time_t start,end;
+    struct tm * timeStartInfo;
+    struct tm * timeEndInfo;
+    double duration; 
+	start = time(NULL);
     float alpha = 0.003;  //0.0045according to the paper of "a guide to SVD for CF"
-    float beta = 0.05;   //0.015 according to the paper of "a guide to SVD for CF"
-    					   //0.0005 according the experiment
-    int dim = 100;//atoi(argv[1]);
-    test_level = 1;//atoi(argv[2]);
-    ofstream outputfile("parameter.txt");
+    float beta = 0.015;   //0.015 according to the paper of "a guide to SVD for CF"
+    					 //0.0005 according the experiment
     
     //for(int i=0; i < 10; i++)
     {
@@ -216,8 +224,11 @@ int main(int argc, char ** argv)
     	svd::model(dim,alpha,beta);	
     }
     outputfile.close();
-    end = clock();
-    duration = (end-start)/CLOCKS_PER_SEC;
+    end = time(NULL);
+    duration = (end-start);
+    timeStartInfo = localtime(&start);
+    timeEndInfo = localtime(&end);
+    cout << "Start at "<<asctime(timeStartInfo)<<", and end at "<< asctime(timeEndInfo)<<"!"<<endl;
     cout << "duration:"<<duration <<" s!" <<endl;
     return 0;
 }
