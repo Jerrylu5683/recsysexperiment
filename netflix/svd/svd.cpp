@@ -38,6 +38,7 @@ namespace svd{
         
         int i,u,j,k;
         
+        /*
         //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
         //在计算的过程中必须要记得所有的值，包括所有的打分总数和分数总和
         int tmpIndex = 0;
@@ -70,7 +71,8 @@ namespace svd{
         	if(buNum[i]>=1)bu[i] = bu[i]/(buNum[i]+10);
         	else bu[i] = 0.0;
         }
-        
+        */
+        srand((unsigned)time(0));
         //@todo 不知道是否能针对初始化的过程做一些优化
         //对w进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
         for(int i = 1; i < ITEM_NUM+1; ++i){
@@ -135,7 +137,8 @@ namespace svd{
             cout << step << "\t" << nowRmse <<'\t'<< preRmse<<" 	n:"<<n<<endl;
             RMSEProbe();  // 检查训练集情况
             
-            //alpha *= 0.992;    //逐步减小学习速率
+            alpha1 *= 0.9;    //逐步减小学习速率
+            alpha2 *= 0.9;
             //RMSEProbe(); 
         }
         //ratingAll(data);  //预测所有的结果
@@ -241,26 +244,28 @@ namespace svd{
 
 int main(int argc, char ** argv)
 {
-	double start,end,duration; 
-	start = clock();
-    float alpha1 = 0.007;  //according the paper of koren: Factorization Meets the Neighborhood: SIGKDD'08
-    float alpha2 = 0.007;    //according the paper of koren: Factorization Meets the Neighborhood: SIGKDD'08
-    float beta1  = 0.005;
-    float beta2  = 0.015;
-    int dim = 100;//atoi(argv[1]);
-    test_level = 1;//atoi(argv[2]);
-    ofstream outputfile("parameter.txt");
+	time_t start,end;
+    struct tm* startInfo;
+    struct tm* endInfo;
+    double duration;
+	start = time(NULL);
+    float alpha1 = 0.05;  //according the paper of koren: Factorization Meets the Neighborhood: SIGKDD'08
+    float alpha2 = 0.05;    //according the paper of koren: Factorization Meets the Neighborhood: SIGKDD'08
+    float beta1  = 0.01;
+    float beta2  = 0.01;
     
     //for(int i=0; i < 10; i++)
     {
     //	beta = i*0.001 + 0.002;
     //	cout << beta << endl;
-    	svd::model(dim,alpha1,alpha2,beta1,beta2);
+    	svd::model(K_NUM,alpha1,alpha2,beta1,beta2);
     	
     }
-    outputfile.close(); 
-    end = clock();
-    duration = (end-start)/CLOCKS_PER_SEC;
+    end = time(NULL);
+    duration = end-start;
+    startInfo = localtime(&start);
+    endInfo =   localtime(&end);
+    cout << "start at" << asctime(startInfo) << ". And end at "<< asctime(endInfo) <<endl;
     cout << "duration:"<<duration <<" s!" <<endl;
     return 0;
 }
