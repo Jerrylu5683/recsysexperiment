@@ -137,8 +137,8 @@ namespace svd{
             cout << step << "\t" << nowRmse <<'\t'<< preRmse<<" 	n:"<<n<<endl;
             RMSEProbe();  // 检查训练集情况
             
-            alpha1 *= 0.9;    //逐步减小学习速率
-            alpha2 *= 0.9;
+            //alpha1 *= 0.9;    //逐步减小学习速率
+            //alpha2 *= 0.9;
             //RMSEProbe(); 
         }
         //ratingAll(data);  //预测所有的结果
@@ -249,8 +249,8 @@ int main(int argc, char ** argv)
     struct tm* endInfo;
     double duration;
 	start = time(NULL);
-    float alpha1 = 0.05;  //according the paper of koren: Factorization Meets the Neighborhood: SIGKDD'08
-    float alpha2 = 0.05;    //according the paper of koren: Factorization Meets the Neighborhood: SIGKDD'08
+    float alpha1 = 0.008;  //according the paper of koren: Factorization Meets the Neighborhood: SIGKDD'08
+    float alpha2 = 0.008;    //according the paper of koren: Factorization Meets the Neighborhood: SIGKDD'08
     float beta1  = 0.01;
     float beta2  = 0.01;
     
