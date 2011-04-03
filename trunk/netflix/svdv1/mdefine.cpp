@@ -95,9 +95,9 @@ void loadRating(char * dirPath, vector< vector<rateNode> >& rateMatrixLocal)
     	//初始化rateMatrix
     	try {
     		rateNode tmpNode;
-    		tmpNode.item = itemId;
+    		tmpNode.user = userId;
     		tmpNode.rate = (short)rate;
-    		rateMatrixLocal[userId].push_back(tmpNode);
+    		rateMatrixLocal[itemId].push_back(tmpNode);
     	}
     	catch (bad_alloc& ba)
     	{
@@ -112,13 +112,13 @@ void loadRating(char * dirPath, vector< vector<rateNode> >& rateMatrixLocal)
 /**
  * 计算全局的平均值
  */
-float setMeanRating(vector< vector<rateNode> > rateMatrixLocal)
+double setMeanRating(vector< vector<rateNode> > rateMatrixLocal)
 {
     //计算平均值;
     double sum = 0;
     int num = 0;
     cout<<"beging mean:"<<endl;
-    for(int i = 1; i < USER_NUM+1; ++i){
+    for(int i = 1; i < ITEM_NUM+1; ++i){
 		for(int j=0; j < rateMatrixLocal[i].size(); ++j) {
 			sum += rateMatrixLocal[i][j].rate;
 			++num;
@@ -138,17 +138,17 @@ double get_rand(int dim)
  */
 void setRand(double  p[], int num, float base)
 {
-    for(int i=1;i<num;++i){
+    for(int i=1;i<num+1;++i){
     	double temp = base+get_rand(num);
         p[i] = temp;
     }
 }
 
-int getRate(vector<rateNode> &v, int item)
+int getRate(vector<rateNode> &v, int user)
 {
 	int size = v.size();
 	for(int i = 0; i < size; ++i) {
-		if(item == v[i].item)return v[i].rate;
+		if(user == v[i].user)return v[i].user;
 	}
 	cout<<"**********************error!!!can't get whate you look for!!***********"<<endl;
 	return 0;

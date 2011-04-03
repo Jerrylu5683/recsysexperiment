@@ -10,12 +10,14 @@
  * Foundation; either version 1, or (at your option) any later version.
  *
  * 本程序的目的是实现koren在TKDD'09论文中的方法，learnFactorizedNeighborhoodModel的方法
+ * the difference between the code in this file  and the code in netflix/svd/svd.cpp is the way of storing the rate
+ * in this file, I store the rate in the sparse matrix ,the row is item and the column is user.
  */
 #include "movielens.h"
 #include "mdefine.cpp"
 
 namespace svd{
-	//使用一些全局变量，存储需要估计的参数，bu，bi,wij
+	//使用一些全局变量，存储需要估计的参数，bu，bi,p,q
     double bu[USER_NUM+1] = {0};
     double bi[ITEM_NUM+1] = {0};       //baseline预测器中的用户偏置和item偏置
     
@@ -25,8 +27,8 @@ namespace svd{
     double p[USER_NUM+1][K_NUM+1] = {0};   //用于存储用户的属性描述p
     double q[ITEM_NUM+1][K_NUM+1] = {0};   //用于item的属性描述q
     
-    vector < vector<rateNode> > rateMatrix(USER_NUM+1);           //使用一个map数组存储稀疏的打分矩阵                     
-	float mean = 0;                         //全局的平均值
+    vector < vector<rateNode> > rateMatrix(ITEM_NUM+1);           //使用二维rateNode数组存储稀疏的打分矩阵                     
+	double mean = 0;                         //全局的平均值
     
     //函数声明
     void RMSEProbe(void);
@@ -38,19 +40,16 @@ namespace svd{
         cout << "begin initialization: " << endl;
         
         loadRating(DIR_PATH,rateMatrix);  //初始化完成
+        
         //getProbeReal(); //get the probe_t.txt
         //exit(0);
-        
         mean = setMeanRating(rateMatrix); //求平均值，求bu和bi的值
+        int i,j,k,itemI,v;
         
-        
-        int i,u,j,k;
-        
-        /*
         //对bu，bi进行初始化,bu,bi的初始化的方法是求平均值，然后减去mean，
         //在计算的过程中必须要记得所有的值，包括所有的打分总数和分数总和
         int tmpIndex = 0;
-	    for(i = 1; i < USER_NUM+1; ++i){
+	    for(i = 1; i < ITEM_NUM+1; ++i){
 	    	int vSize = rateMatrix[i].size();
 			for(j=0; j < vSize; ++j) {
 				bi[rateMatrix[i][j].item] += (rateMatrix[i][j].rate - mean);
@@ -79,17 +78,16 @@ namespace svd{
         	if(buNum[i]>=1)bu[i] = bu[i]/(buNum[i]+10);
         	else bu[i] = 0.0;
         }
-        */
         
         srand((unsigned)time(0));
         //@todo 不知道是否能针对初始化的过程做一些优化
         //对w进行初始化，初始化的方法是随机函数，不知道这种方法是否好，是否会影响结果？？？？？？？
         for(int i = 1; i < ITEM_NUM+1; ++i){
-            setRand(q[i],K_NUM+1,0);    //初始化q[i]
+            setRand(q[i],K_NUM,0);    //初始化q[i]
         }
         
         for(int i = 1; i < USER_NUM+1; ++i){
-            setRand(p[i],K_NUM+1,0);    //初始化p[i]
+            setRand(p[i],K_NUM,0);    //初始化p[i]
         }
        
         cout <<"initialization end!"<<endl<< "begin iteration: " << endl;
@@ -105,16 +103,15 @@ namespace svd{
         for(int step = 0; step < 60; ++step){  //只迭代60次
             long double rmse = 0.0;
             int n = 0;
-            for( u = 1; u < USER_NUM+1; ++u) {   //循环处理每一个用户 
-            	
-               	int RuNum = rateMatrix[u].size(); //用户u打过分的item数目
-               	float sqrtRuNum = 0.0;
-               	if(RuNum>1) sqrtRuNum = (1.0/sqrt(RuNum));
+            for( itemI = 1; itemI < ITEM_NUM+1; ++itemI) {   //循环处理每一个用户 	
+               	int RiNum = rateMatrix[itemI].size(); //  the user num who rated the item itemI
+               	float sqrtRiNum = 0.0;
+               	if(RiNum>1) sqrtRiNum = (1.0/sqrt(RiNum));
                	
                 //迭代处理
-                for(i=0; i < RuNum; ++i) {// 循环处理u打分过的每一个item
-                	int itemI = rateMatrix[u][i].item;
-                	short rui = rateMatrix[u][i].rate; //实际的打分
+                for( v=0; v < RiNum; ++v) {// 循环处理u打分过的每一个item
+                	int u = rateMatrix[itemI][v].user;
+                	short rui = rateMatrix[itemI][v].rate; //实际的打分
                 	double bui = mean + bu[u] + bi[itemI];
                 	pui = predictRate(u,itemI);
                 	
@@ -156,10 +153,9 @@ namespace svd{
     
     float predictRate(int user,int item)
     {
-    	int RuNum = rateMatrix[user].size(); //用户u打过分的item数目
-       	float sqrtRuNum = 0.0;
+    	int RiNum = rateMatrix[item].size(); //用户u打过分的item数目
        	double ret; 
-    	if(RuNum > 1)
+    	if(RiNum > 1)
     	{
     		ret = mean + bu[user] + bi[item] +  dot(p[user],q[item]);//这里先不对k进行变化，先取k=无穷大
     	}
@@ -225,7 +221,7 @@ namespace svd{
 	    	itemId = atoi(strTemp.substr(0,pos1).c_str());
 	    	userId = atoi(strTemp.substr(pos1+1).c_str());
 	    	//cout<<itemId<<'\t'<<userId<<'\t'<<endl;	    	exit(0);
-	    	rateValue = getRate(rateMatrix[userId],itemId);
+	    	rateValue = getRate(rateMatrix[itemId],userId);
 	    	if(rateValue == 0) {
 	    		logNP<<itemId<<','<<userId<<','<<rateValue<<endl;
 	    	}

@@ -31,7 +31,7 @@ using namespace std;
 //#define ITEM_NUM 1000
 #define USER_NUM 480189 
 #define ITEM_NUM 17770
-#define K_NUM  100
+#define K_NUM  50
 #define DIR_PATH "../../nf_dataset/transfer_set/"
 #define PROBE_SET "../probe_real.txt"
 #define TRAINING_SET "../data_without_prob.txt"
@@ -39,7 +39,7 @@ using namespace std;
 
 struct rateNode
 {
-	short item;
+	int user;
 	short rate;
 };
 #endif // NETFLIX_SVD_MOVIELENS_H_
