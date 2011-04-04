@@ -1,3 +1,15 @@
+/*
+* This file is Copyright (C) 2011 Lv Hongliang. All Rights Reserved.
+* please maitain the copyright information completely when you redistribute the code.
+* 
+* Please contact me via email honglianglv@gmail.com
+* my blog: http://lifecrunch.biz
+* my twitter: http://twitter.com/honglianglv
+*
+* It is free software; you can redistribute it and/or modify it under 
+* the GNU General Public License as published by the Free Software
+* Foundation; either version 1, or (at your option) any later version.
+*/
 /**
  * 本程序的目的是测试 global Neighborhood 方法的扩展性，将Recommender system handbook中的P171页，5.35的
  *  公式，扩展到3维多指标打分的情况

@@ -1,4 +1,16 @@
 # -*- coding: UTF-8 -*-
+#/*
+#* This file is Copyright (C) 2011 Lv Hongliang. All Rights Reserved.
+#* please maitain the copyright information completely when you redistribute the code.
+#* 
+#* Please contact me via email honglianglv@gmail.com
+#* my blog: http://lifecrunch.biz
+#* my twitter: http://twitter.com/honglianglv
+#*
+#* It is free software; you can redistribute it and/or modify it under 
+#* the GNU General Public License as published by the Free Software
+#* Foundation; either version 1, or (at your option) any later version.
+#*/
 # A dictionary of movie critics and their ratings of a small
 # set of movies
 critics={'Lisa Rose': {'Lady in the Water': 2.5, 'Snakes on a Plane': 3.5,

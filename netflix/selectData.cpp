@@ -1,3 +1,15 @@
+/*
+* This file is Copyright (C) 2011 Lv Hongliang. All Rights Reserved.
+* please maitain the copyright information completely when you redistribute the code.
+* 
+* Please contact me via email honglianglv@gmail.com
+* my blog: http://lifecrunch.biz
+* my twitter: http://twitter.com/honglianglv
+*
+* It is free software; you can redistribute it and/or modify it under 
+* the GNU General Public License as published by the Free Software
+* Foundation; either version 1, or (at your option) any later version.
+*/
 /**
 	本文件的作用是挑选出一批少量的数据，便于测试算法，等算法都调整好了之后然后再使用大规模数据测试
 	主要操作有：
