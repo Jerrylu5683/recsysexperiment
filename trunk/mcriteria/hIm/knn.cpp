@@ -1,3 +1,15 @@
+/*
+* This file is Copyright (C) 2011 Lv Hongliang. All Rights Reserved.
+* please maitain the copyright information completely when you redistribute the code.
+* 
+* Please contact me via email honglianglv@gmail.com
+* my blog: http://lifecrunch.biz
+* my twitter: http://twitter.com/honglianglv
+*
+* It is free software; you can redistribute it and/or modify it under 
+* the GNU General Public License as published by the Free Software
+* Foundation; either version 1, or (at your option) any later version.
+*/
 /**
  * 本程序的目的是测试最经典的算法 knn，但是最主要的事情还是完成pre-computation，事先计算出
  × item-item的相似度

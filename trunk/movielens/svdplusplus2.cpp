@@ -1,3 +1,15 @@
+/*
+* This file is Copyright (C) 2011 Lv Hongliang. All Rights Reserved.
+* please maitain the copyright information completely when you redistribute the code.
+* 
+* Please contact me via email honglianglv@gmail.com
+* my blog: http://lifecrunch.biz
+* my twitter: http://twitter.com/honglianglv
+*
+* It is free software; you can redistribute it and/or modify it under 
+* the GNU General Public License as published by the Free Software
+* Foundation; either version 1, or (at your option) any later version.
+*/
 /**
 这里应该解释一下svd和svd++的区别，应该解释这个情况，svd++考虑到了隐形反馈，p(u)不是一个简单的项量，
 不仅仅包括了向量，还包括了评分item数量的一些反馈。
