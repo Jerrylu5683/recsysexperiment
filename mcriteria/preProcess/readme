@@ -1,0 +1,5 @@
+1.first use getUserIdHotelId to get the new user and item map  getUserIdHotelId.php
+2.convert original file to new files use the newId
+	(1)convert id
+	(2) delete anonymous and noisy infor
+3.
