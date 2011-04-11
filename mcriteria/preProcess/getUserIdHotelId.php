@@ -16,7 +16,7 @@
 //var_dump(unserialize(file_get_contents(hotelIds)));
 //var_dump(unserialize(file_get_contents(userIds));
 //die;
-$dirBase = '../tripDataset';
+$dirBase = '../../tripDataset_o'; 
 
 
 //(1)给酒店编号
@@ -49,6 +49,7 @@ $hotelIdStr = '';
 foreach($hotelIds as $key=>$hotelId) {  //将hotelId储存成c容易读取的形式
 	$hotelIdStr .= $key."\t".($hotelId)."\n";
 }
+var_dump($hotelIds);
 $userIdStr = '';
 foreach($userIds as $key=>$userId) {  //将hotelId储存成c容易读取的形式
 	$userIdStr .= $key."\t".($userId)."\n";
