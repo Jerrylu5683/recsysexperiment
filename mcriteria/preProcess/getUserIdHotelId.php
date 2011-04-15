@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*
 * This file is Copyright (C) 2011 Lv Hongliang. All Rights Reserved.
 * please maitain the copyright information completely when you redistribute the code.

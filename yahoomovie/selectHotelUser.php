@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 //选择hotel非常容易，因为hotel的打分数据都在一个文件中，选择hotel完毕，再选择user
 
