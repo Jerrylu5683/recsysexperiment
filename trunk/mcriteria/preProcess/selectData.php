@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**将选择好的hotel和user的打分数据存储到“select/data”文件夹中，这样
  * 大部分代码都不用改，只用该一个dirBase变量即可
 */
