@@ -93,8 +93,8 @@ int main()
     
     srand((unsigned)time(0));
     //split the ratings
-    ofstream training("training_1.txt");
-    ofstream test("test_1.txt");
+    ofstream training("tmpData/training.txt");
+    ofstream test("tmpData/test.txt");
     for(int i = 1; i < USER_NUM+1; ++i){
     	int vSize = rateMatrix[i].size();
     	
@@ -132,7 +132,7 @@ int main()
  */
 void get_rand(set<int> & myset, int low, int high,int length)
 {
-	if(low +2 >= high) return;
+	if(low +5 >= high) return;
 	int num = 0;
 	set<int>::iterator end =  myset.end();
 	int good = high-low+1;
