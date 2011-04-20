@@ -73,8 +73,13 @@ void loadRating(char * fileName, vector< vector<rateNode> >& rateMatrixLocal, co
         //initialization rateMatrix
         try {
             rateNode tmpNode;
-            tmpNode.item = itemId;
-            tmpNode.rate = (short)rate;
+    		tmpNode.item = (short)itemId;
+    		tmpNode.story = (short)story;
+    		tmpNode.acting = (short)acting;
+    		tmpNode.direction = (short)direction;
+    		tmpNode.visual = (short)visual;
+    		tmpNode.overall = (short)overall;
+    		tmpNode.flag = 0;
             rateMatrixLocal[userId].push_back(tmpNode);
         }
         catch (bad_alloc& ba) {
@@ -100,8 +105,7 @@ void loadProbe(char * fileName,vector<testSetNode>& probeSet, const char* separa
     char* pch ; // store a token of a string
 
     string strTemp;
-    int rateValue,itemId,userId,probeNum=0;
-    
+    int rateValue = 0, itemId = 0, userId = 0, story = 0, acting = 0, direction = 0, visual = 0, overall = 0;
     while(in.getline(rateStr,256)){
         strTemp = rateStr;
         if(strTemp.length() < 4) continue;
@@ -110,16 +114,25 @@ void loadProbe(char * fileName,vector<testSetNode>& probeSet, const char* separa
         while (pch != NULL) {
             if(0 == i) itemId = atoi(pch);
             else if(1 == i) userId = atoi(pch);
-            else if(2 == i) rateValue = atoi(pch);
-            else if(i > 2) break;
+            else if(2 == i) story = atoi(pch);
+            else if(3 == i) acting = atoi(pch);
+            else if(4 == i) direction = atoi(pch);
+            else if(5 == i) visual = atoi(pch);
+            else if(6 == i) overall = atoi(pch);
+            else if(i > 6) break;
             ++i;
             pch = strtok (NULL,separator);
         }
         try {
             testSetNode tmpNode;
-            tmpNode.item = itemId;
-            tmpNode.rate = (short)rateValue;
-            tmpNode.user = userId;
+            tmpNode.user = (short)userId;
+            tmpNode.item = (short)itemId;
+    		tmpNode.story = (short)story;
+    		tmpNode.acting = (short)acting;
+    		tmpNode.direction = (short)direction;
+    		tmpNode.visual = (short)visual;
+    		tmpNode.overall = (short)overall;
+    		tmpNode.flag = 0;
             probeSet.push_back(tmpNode);
             ++probeNum;
         }
