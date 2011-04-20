@@ -42,7 +42,7 @@ namespace gNbrHim{
 	double cMatrix[ITEM_NUM+1][ITEM_NUM+1][CRI_NUM+1] = {0};  //隐含因子矩阵
 	double mean = 0;                         //全局的平均值 
     
-    vector < vector<rateNode> > rateMatrix(USER_NUM+1);   //store training set
+    vector<rateNode> rateMatrix[USER_NUM+1];   //store training set
     vector<testSetNode> probeRow;                            //store test set
     
     //initialize the bias bu and bi, the method in the page 2 of koren's TKDD'09 paper
@@ -53,7 +53,7 @@ namespace gNbrHim{
         for(i = 1; i < USER_NUM+1; ++i){
             int vSize = rateMatrix[i].size();
             for(j=0; j < vSize; ++j) {
-                bi[rateMatrix[i][j].item] += (rateMatrix[i][j].rate - mean);
+                bi[rateMatrix[i][j].item] += (rateMatrix[i][j].rate - mean);//here you should add all the ratings,you need a loop. How to organize the loop?? I just need a iterator
                 biNum[rateMatrix[i][j].item] += 1;
             }            
         }
@@ -77,8 +77,15 @@ namespace gNbrHim{
             else bu[i] = 0.0;
         }
         
-        count<<"bi initialized  successfully!"<<endl;
+        count<<"bu initialized  successfully!"<<endl;
         
+        for(i = 1; i < USER_NUM+1; ++i){
+            int vSize = rateMatrix[i].size();
+            for(j=0; j < vSize; ++j) {
+                bc[i] += (rateMatrix[i][j].rate - mean - bi[rateMatrix[i][j].item]);
+                buNum[i] += 1;
+            }            
+        }
         for(i = 1; i < CRI_NUM+1; ++i) {
             if(bcNum[i] >=1)bc[i] = bi[i]/(biNum[i]+25);
             else bi[i] = 0.0;    
@@ -172,7 +179,7 @@ namespace gNbrHim{
             RMSEProbe(probeRow,K_NUM);  // check rmse of test set 
             
             alpha1 *= slowRate;    //gradually reduce the learning rate(逐步减小学习速率)
-            alpha2 *= slowRate;
+            alpha2 *= slowRate;  //中文test中文繁體test
         }
         RMSEProbe(probeRow,K_NUM);  //  check rmse of test set 
         return;
