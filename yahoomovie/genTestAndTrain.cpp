@@ -17,6 +17,7 @@
 #include <set>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 #define  SOURCE "./clean-yahoo-user-ratings.txt"
 #define  SEPARATOR " "
 #define USER_NUM 409399 
