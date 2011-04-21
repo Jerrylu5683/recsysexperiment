@@ -53,7 +53,8 @@ namespace gNbrHim{
         for(i = 1; i < USER_NUM+1; ++i){
             int vSize = rateMatrix[i].size();
             for(j=0; j < vSize; ++j) {
-                bi[rateMatrix[i][j].item] += (rateMatrix[i][j].rate - mean);//here you should add all the ratings,you need a loop. How to organize the loop?? I just need a iterator
+                bi[rateMatrix[i][j].item] += (rateMatrix[i][j].rate - mean);//here you should add all the ratings,
+                                                                            //you need a loop. How to organize the loop?? I just need a iterator
                 biNum[rateMatrix[i][j].item] += 1;
             }            
         }
