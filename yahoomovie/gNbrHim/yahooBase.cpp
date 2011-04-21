@@ -23,7 +23,7 @@
  * load the training set of netflix dataset
  * 
  */
-void loadRating(char * fileName, vector< vector<rateNode> >& rateMatrixLocal, const char* separator)
+void loadRating(const char * fileName, vector<rateNode> rateMatrixLocal[USER_NUM+1][CRI_NUM+1], const char* separator)
 {
     char rateStr[256];
     char* pch;    
@@ -66,21 +66,32 @@ void loadRating(char * fileName, vector< vector<rateNode> >& rateMatrixLocal, co
             ++i;
             pch = strtok (NULL,separator);
         }
-        if(0 == itemId || 0 == userId ||  0 == rate) {
+        if(0 == itemId || 0 == userId) {
             cout<<strTemp<<"#####################"<<endl;
             exit(1);
         }        
         //initialization rateMatrix
         try {
-            rateNode tmpNode;
-    		tmpNode.item = (short)itemId;
-    		tmpNode.story = (short)story;
-    		tmpNode.acting = (short)acting;
-    		tmpNode.direction = (short)direction;
-    		tmpNode.visual = (short)visual;
-    		tmpNode.overall = (short)overall;
-    		tmpNode.flag = 0;
-            rateMatrixLocal[userId].push_back(tmpNode);
+            rateNode tmpNode1;
+    		tmpNode1.item = (short)itemId;
+    		tmpNode1.rate = (0 == story) ? -1 : (short)story;
+            rateMatrixLocal[userId][1].push_back(tmpNode1);
+            rateNode tmpNode2;
+    		tmpNode1.item = (short)itemId;
+    		tmpNode1.rate = (0 == acting) ? -1 : (short)acting;
+            rateMatrixLocal[userId][2].push_back(tmpNode2);
+            rateNode tmpNode3;
+    		tmpNode1.item = (short)itemId;
+    		tmpNode1.rate = (0 == direction) ? -1 : (short)direction;
+            rateMatrixLocal[userId][3].push_back(tmpNode3);
+            rateNode tmpNode4;
+    		tmpNode1.item = (short)itemId;
+    		tmpNode1.rate = (0 == visual) ? -1 : (short)visual;
+            rateMatrixLocal[userId][4].push_back(tmpNode4);
+            rateNode tmpNode5;
+    		tmpNode1.item = (short)itemId;
+    		tmpNode1.rate = (0 == overall) ? -1 : (short)overall;
+            rateMatrixLocal[userId][5].push_back(tmpNode5);
         }
         catch (bad_alloc& ba) {
             cerr << "bad_alloc caught: " << ba.what() << endl;
@@ -92,8 +103,8 @@ void loadRating(char * fileName, vector< vector<rateNode> >& rateMatrixLocal, co
     return;
 }
 
-
 //load test set of netflix dataset
+/*
 void loadProbe(char * fileName,vector<testSetNode>& probeSet, const char* separator)
 {
     ifstream in(fileName);
@@ -144,4 +155,5 @@ void loadProbe(char * fileName,vector<testSetNode>& probeSet, const char* separa
     cout << "Load " << probeNum << " test ratings successfully!"<<endl;
     in.close(); 
 }
+*/
 #endif // YAHOOBASE_CPP_

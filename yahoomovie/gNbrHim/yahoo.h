@@ -35,11 +35,12 @@ using namespace std;
 struct rateNode
 {
 	short item;
-	short story;
-	short acting;
-	short direction;
-	short visual;
-	short overall;
+    short rate;
+//	short story;
+//	short acting;
+//	short direction;
+//	short visual;
+//	short overall;
 };
 
 
@@ -49,11 +50,13 @@ struct testSetNode
 {
     int user;
     short item;
-    short story;
-	short acting;
-	short direction;
-	short visual;
-	short overall;
+    short cri; //criteria
+    short rate;
+//    short story;
+//	short acting;
+//	short direction;
+//	short visual;
+//	short overall;
 };
-float predictRate(int user,int item,int dim);
+float predictRate(int user,int item,int cri);
 #endif // YAHOO_H_

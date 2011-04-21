@@ -11,10 +11,6 @@
  * This file gives some define of the yahoo movie dataset
  *
  */
-#include "./yahoo.h"
-#include "../common.cpp"
-#include "./yahooBase.cpp"
-#include "./gNbrHimBase.cpp"
 #define USER_NUM 409399
 #define ITEM_NUM 5628
 #define CRI_NUM 5
@@ -22,6 +18,10 @@
 #define TRAINING_SET "../tmpData/training.txt"
 #define TEST_SET "../tmpData/test.txt"
 #define RATE_SP " "
+#include "./yahoo.h"
+#include "../common.cpp"
+#include "./yahooBase.cpp"
+#include "./gNbrHimBase.cpp"
 
 int main(int argc, char ** argv)
 {
@@ -44,7 +44,7 @@ int main(int argc, char ** argv)
         //cout << alpha << endl;
         //void model(int dim, float  alpha1, float alpha2, float beta1, float beta2,
         // int maxStep=60,double slowRate=1,bool isUpdateBias=true)
-        gNbr::model(K_NUM,alpha1,alpha2,beta1,beta2,60,0.99,true);
+        gNbrHim::model(K_NUM,alpha1,alpha2,beta1,beta2,60,0.99,true);
     }
     end = time(NULL);
     duration = (end-start);

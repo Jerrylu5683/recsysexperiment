@@ -48,16 +48,19 @@ void explode(const char * probe,  string dataStr ,vector<string> &result)
 /**
  * calculate the mean of all the ratings
  */
-float setMeanRating(int userNum, vector< vector<rateNode> > rateMatrixLocal)
+float setMeanRating(int userNum, int criNum, vector<rateNode> rateMatrixLocal[USER_NUM+1][CRI_NUM+1])
 {
     //calculate the mean
     double sum = 0;
     int num = 0;
     cout<<"beging mean:"<<endl;
-    for(int i = 1; i < userNum+1; ++i){
-        for(int j=0; j < rateMatrixLocal[i].size(); ++j) {
-            sum += rateMatrixLocal[i][j].rate;
-            ++num;
+    for (int i = 1; i < userNum+1; ++i) {
+        for(int c = 1; c <criNum+1; ++c) {
+            for (int j=0; j < rateMatrixLocal[i][c].size(); ++j) {
+                if (-1 == rateMatrixLocal[i][c][j].rate) continue;
+                sum += rateMatrixLocal[i][c][j].rate;
+                ++num;
+            }
         }
     }
     cout<<"end mean!mean:"<<(sum/num)<<endl;
@@ -110,7 +113,7 @@ double RMSEProbe(vector<testSetNode>& probeSet,int dim)
     long double rmse = 0;
     
     for(int i = 0; i < probeSize; ++i) {
-        pRate = predictRate(probeSet[i].user,probeSet[i].item,dim);      //predict rate
+        pRate = predictRate(probeSet[i].user,probeSet[i].item,probeSet[i].cri);      //predict rate
         //cout<<pRate<<"    "<<probeSet[i].rate<<"    "<<probeSet[i].user<<"    "<<probeSet[i].item<<endl;
         err = pRate-probeSet[i].rate;
         rmse += err*err;
