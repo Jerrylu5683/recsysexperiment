@@ -44,7 +44,7 @@ int main(int argc, char ** argv)
         //cout << alpha << endl;
         //void model(int dim, float  alpha1, float alpha2, float beta1, float beta2,
         // int maxStep=60,double slowRate=1,bool isUpdateBias=true)
-        gNbrHim::model(K_NUM,alpha1,alpha2,beta1,beta2,60,0.99,true);
+        gNbrHim::model(K_NUM,alpha1,alpha2,beta1,beta2,160,0.999999,true);
     }
     end = time(NULL);
     duration = (end-start);
