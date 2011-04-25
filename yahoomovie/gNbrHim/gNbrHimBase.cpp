@@ -141,7 +141,7 @@ namespace gNbrHim{
                                           //if the rmse of test begin to increase, then break
         double nowRmse = 0.0;
         cout <<"begin testRMSEProbe(): " << endl;
-        RMSEProbe(probeRow,K_NUM);
+        //RMSEProbe(probeRow,K_NUM);
         //main loop
         for (int step = 0; step < maxStep; ++step) {  //only iterate maxStep times
             long double rmse = 0.0;
@@ -155,15 +155,17 @@ namespace gNbrHim{
                     for (i=0; i < RuNum; ++i) {// process every item rated by user u(循环处理u打分过的每一个item)
                         int itemI = rateMatrix[u][c][i].item;
                         short ruic = rateMatrix[u][c][i].rate; //real rate
+                        if(-1 == ruic)continue; //has no rate ,can't correct the parameter!! 
                         //pui = predictRate(u,itemI,mean,bu,bi,p[u],q[itemI],dim);
                         puic = predictRate(u,itemI,c);
                     
                         float euic = ruic - puic;
                     
                         if (isnan(euic)) {// fabs(eui) >= 4.2 || 
-                            cout<<u<<'\t'<<i<<'\t'<<puic<<'\t'<<ruic<<"    "<<bu[u]<<"    "<<bi[itemI]<<"    "<<mean<<endl;
+                        //if(u == && itemI == && c==
+                            cout<<u<<'\t'<<itemI<<'\t'<<c<<'\t'<<puic<<'\t'<<ruic<<"    "<<bu[u]<<"    "<<bi[itemI]<<"    "<<mean<<" "<<bc[c]<<endl;
                             //printArray(q[itemI],p[u],K_NUM+1);
-                            exit(1);
+                            exit(0);
                         }
                         rmse += euic * euic; ++n;
                         if (n % 1000000 == 0) cout<<"step:"<<step<<"    n:"<<n<<" dealed!"<<endl;
@@ -223,11 +225,14 @@ float predictRate(int user, int item, int cri)
         double bujc = mean+ bu[user] + bc[cri] + bi[itemId];
         sumw += (rujc-bujc) * wMatrix[item][itemId][cri];
         sumc += cMatrix[item][itemId][cri];
+        if (245==user && 5848==item && 1==cri) {
+            cout<<itemId<<"  w:"<<wMatrix[item][itemId][cri]<<" c:"<<cMatrix[item][itemId][cri]<<endl;
+        } 
     }
     if(vSize > 1) {
         ret = bui + sqrtRuNum * (sumw+sumc);
     }
-    if(ret > 5) ret = 5.0;
+    if(ret > 13) ret = 13.0;
     else if( ret < 1) ret = 1.0;
     return ret;
 }

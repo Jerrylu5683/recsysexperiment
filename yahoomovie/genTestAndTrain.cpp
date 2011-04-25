@@ -111,12 +111,12 @@ int main()
     	//cout<<"set flag finish!"<<endl;
 		for(int j=0; j < vSize; ++j) {
 			if(rateMatrix[i][j].flag == 1) { // in test set
-				test <<i<<" "<<rateMatrix[i][j].item<<" "<<rateMatrix[i][j].story<<" ";
+				test <<rateMatrix[i][j].item<<" "<<i<<" "<<rateMatrix[i][j].story<<" ";
 				test <<rateMatrix[i][j].acting<<" "<<rateMatrix[i][j].direction<<" ";
 				test <<rateMatrix[i][j].visual<<" "<<rateMatrix[i][j].overall<<endl;
 			}
 			else {
-				training <<i<<" "<<rateMatrix[i][j].item<<" "<<rateMatrix[i][j].story<<" ";
+				training <<rateMatrix[i][j].item<<" "<<i<<" "<<rateMatrix[i][j].story<<" ";
 				training <<rateMatrix[i][j].acting<<" "<<rateMatrix[i][j].direction<<" ";
 				training <<rateMatrix[i][j].visual<<" "<<rateMatrix[i][j].overall<<endl;
 			}

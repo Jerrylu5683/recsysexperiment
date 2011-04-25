@@ -66,7 +66,7 @@ void loadRating(const char * fileName, vector<rateNode> rateMatrixLocal[USER_NUM
             ++i;
             pch = strtok (NULL,separator);
         }
-        if(0 == itemId || 0 == userId) {
+        if(0 == itemId || 0 == userId || itemId > ITEM_NUM || userId > USER_NUM) {
             cout<<strTemp<<"#####################"<<endl;
             exit(1);
         }        
@@ -77,20 +77,20 @@ void loadRating(const char * fileName, vector<rateNode> rateMatrixLocal[USER_NUM
     		tmpNode1.rate = (0 == story) ? -1 : (short)story;
             rateMatrixLocal[userId][1].push_back(tmpNode1);
             rateNode tmpNode2;
-    		tmpNode1.item = (short)itemId;
-    		tmpNode1.rate = (0 == acting) ? -1 : (short)acting;
+    		tmpNode2.item = (short)itemId;
+    		tmpNode2.rate = (0 == acting) ? -1 : (short)acting;
             rateMatrixLocal[userId][2].push_back(tmpNode2);
             rateNode tmpNode3;
-    		tmpNode1.item = (short)itemId;
-    		tmpNode1.rate = (0 == direction) ? -1 : (short)direction;
+    		tmpNode3.item = (short)itemId;
+    		tmpNode3.rate = (0 == direction) ? -1 : (short)direction;
             rateMatrixLocal[userId][3].push_back(tmpNode3);
             rateNode tmpNode4;
-    		tmpNode1.item = (short)itemId;
-    		tmpNode1.rate = (0 == visual) ? -1 : (short)visual;
+    		tmpNode4.item = (short)itemId;
+    		tmpNode4.rate = (0 == visual) ? -1 : (short)visual;
             rateMatrixLocal[userId][4].push_back(tmpNode4);
             rateNode tmpNode5;
-    		tmpNode1.item = (short)itemId;
-    		tmpNode1.rate = (0 == overall) ? -1 : (short)overall;
+    		tmpNode5.item = (short)itemId;
+    		tmpNode5.rate = (0 == overall) ? -1 : (short)overall;
             rateMatrixLocal[userId][5].push_back(tmpNode5);
         }
         catch (bad_alloc& ba) {
