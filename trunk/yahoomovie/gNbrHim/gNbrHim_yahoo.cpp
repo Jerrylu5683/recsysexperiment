@@ -14,7 +14,7 @@
 #define USER_NUM 409399
 #define ITEM_NUM 5628
 #define CRI_NUM 5
-#define K_NUM 50
+#define K_NUM 1
 #define TRAINING_SET "../tmpData/training.txt"
 #define TEST_SET "../tmpData/test.txt"
 #define RATE_SP " "

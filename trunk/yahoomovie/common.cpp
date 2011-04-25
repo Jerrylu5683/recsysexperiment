@@ -63,13 +63,15 @@ float setMeanRating(int userNum, int criNum, vector<rateNode> rateMatrixLocal[US
             }
         }
     }
-    cout<<"end mean!mean:"<<(sum/num)<<endl;
+    cout<<"end mean!mean:"<<(sum/num)<<"  "<<sum<<"   "<<num<<endl;
     return sum/num;
 }
 
 double get_rand(int dim)
 {
-    return 0.1 * (rand()/(double)RAND_MAX) / sqrt(dim);
+    double temp = 0.1 * (rand()/(double)RAND_MAX);
+    //cout<<temp<<endl;
+    return temp;
 }
 
 /**
@@ -78,7 +80,7 @@ double get_rand(int dim)
 void setRand(double  p[], int dim, float base)
 {
     for(int i=1;i<dim+1;++i){
-        double temp = base+get_rand(dim);
+        double temp = base+get_rand(K_NUM);
         p[i] = temp;
     }
 }
