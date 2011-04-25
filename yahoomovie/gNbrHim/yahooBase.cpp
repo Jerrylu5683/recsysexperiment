@@ -104,8 +104,7 @@ void loadRating(const char * fileName, vector<rateNode> rateMatrixLocal[USER_NUM
 }
 
 //load test set of netflix dataset
-/*
-void loadProbe(char * fileName,vector<testSetNode>& probeSet, const char* separator)
+void loadProbe(const char * fileName,vector<testSetNode>& probeSet, const char* separator)
 {
     ifstream in(fileName);
     if (!in.is_open()) {
@@ -117,6 +116,7 @@ void loadProbe(char * fileName,vector<testSetNode>& probeSet, const char* separa
 
     string strTemp;
     int rateValue = 0, itemId = 0, userId = 0, story = 0, acting = 0, direction = 0, visual = 0, overall = 0;
+    int probeNum = 0;
     while(in.getline(rateStr,256)){
         strTemp = rateStr;
         if(strTemp.length() < 4) continue;
@@ -135,17 +135,51 @@ void loadProbe(char * fileName,vector<testSetNode>& probeSet, const char* separa
             pch = strtok (NULL,separator);
         }
         try {
-            testSetNode tmpNode;
-            tmpNode.user = (short)userId;
-            tmpNode.item = (short)itemId;
-    		tmpNode.story = (short)story;
-    		tmpNode.acting = (short)acting;
-    		tmpNode.direction = (short)direction;
-    		tmpNode.visual = (short)visual;
-    		tmpNode.overall = (short)overall;
-    		tmpNode.flag = 0;
-            probeSet.push_back(tmpNode);
-            ++probeNum;
+            testSetNode tmpNode1;
+    		tmpNode1.item = (short)itemId;
+    		tmpNode1.rate = (0 == story) ? -1 : (short)story;
+            tmpNode1.user = userId;
+            tmpNode1.cri = 1;
+            if (-1 != tmpNode1.rate) {
+                probeSet.push_back(tmpNode1);
+                ++probeNum;
+            }
+            testSetNode tmpNode2;
+    		tmpNode2.item = (short)itemId;
+            tmpNode2.user = userId;
+            tmpNode2.cri = 2;
+    		tmpNode2.rate = (0 == acting) ? -1 : (short)acting;
+            if (-1 != tmpNode2.rate) {
+                probeSet.push_back(tmpNode2);
+                ++probeNum;
+            }
+            testSetNode tmpNode3;
+    		tmpNode3.item = (short)itemId;
+            tmpNode3.user = userId;
+            tmpNode3.cri = 3;
+    		tmpNode3.rate = (0 == direction) ? -1 : (short)direction;
+            if (-1 != tmpNode3.rate) {
+                probeSet.push_back(tmpNode3);
+                ++probeNum;
+            }
+            testSetNode tmpNode4;
+    		tmpNode4.item = (short)itemId;
+            tmpNode4.user = userId;
+            tmpNode4.cri = 4;
+    		tmpNode4.rate = (0 == visual) ? -1 : (short)visual;
+            if (-1 != tmpNode4.rate) {
+                probeSet.push_back(tmpNode4);
+                ++probeNum;
+            }
+            testSetNode tmpNode5;
+    		tmpNode5.item = (short)itemId;
+            tmpNode5.user = userId;
+            tmpNode5.cri = 5;
+    		tmpNode5.rate = (0 == overall) ? -1 : (short)overall;
+            if (-1 != tmpNode5.rate) {
+                probeSet.push_back(tmpNode5);
+                ++probeNum;
+            }
         }
         catch (bad_alloc& ba) {
             cerr << "bad_alloc caught: " << ba.what() << endl;
@@ -155,5 +189,4 @@ void loadProbe(char * fileName,vector<testSetNode>& probeSet, const char* separa
     cout << "Load " << probeNum << " test ratings successfully!"<<endl;
     in.close(); 
 }
-*/
 #endif // YAHOOBASE_CPP_

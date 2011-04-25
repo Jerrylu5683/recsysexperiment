@@ -125,7 +125,7 @@ namespace gNbrHim{
     {
         cout << "begin initialization: " << endl;
         loadRating(TRAINING_SET, rateMatrix, RATE_SP);  //load training set
-        //loadProbe(PROBE_SET,probeRow,RATE_SP);   //load test set
+        loadProbe(TEST_SET,probeRow,RATE_SP);   //load test set
         mean = setMeanRating(USER_NUM, CRI_NUM, rateMatrix); //calculate the mean
         int i,u,j,c,k;
         
@@ -141,7 +141,7 @@ namespace gNbrHim{
                                           //if the rmse of test begin to increase, then break
         double nowRmse = 0.0;
         cout <<"begin testRMSEProbe(): " << endl;
-        //RMSEProbe(probeRow,K_NUM);
+        RMSEProbe(probeRow,K_NUM);
         //main loop
         for (int step = 0; step < maxStep; ++step) {  //only iterate maxStep times
             long double rmse = 0.0;
@@ -191,12 +191,12 @@ namespace gNbrHim{
             else
                 preRmse = nowRmse;
             cout << step << "\t" << nowRmse <<'\t'<< preRmse<<"     n:"<<n<<endl;
-            //RMSEProbe(probeRow,K_NUM);  // check rmse of test set 
+            RMSEProbe(probeRow,K_NUM);  // check rmse of test set 
             
             alpha1 *= slowRate;    //gradually reduce the learning rate(逐步减小学习速率)
             alpha2 *= slowRate;
         }
-        //RMSEProbe(probeRow,K_NUM);  //  check rmse of test set 
+        RMSEProbe(probeRow,K_NUM);  //  check rmse of test set 
         return;
     }
 };
