@@ -135,6 +135,7 @@ void loadProbe(const char * fileName,vector<testSetNode>& probeSet, const char* 
             pch = strtok (NULL,separator);
         }
         try {
+            /*
             testSetNode tmpNode1;
     		tmpNode1.item = (short)itemId;
     		tmpNode1.rate = (0 == story) ? -1 : (short)story;
@@ -171,6 +172,7 @@ void loadProbe(const char * fileName,vector<testSetNode>& probeSet, const char* 
                 probeSet.push_back(tmpNode4);
                 ++probeNum;
             }
+            */
             testSetNode tmpNode5;
     		tmpNode5.item = (short)itemId;
             tmpNode5.user = userId;
