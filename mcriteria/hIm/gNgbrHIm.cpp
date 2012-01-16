@@ -132,7 +132,7 @@ namespace svd{
         double pui = 0.0 ; // 预测的u对i的打分
         double preRmse = 1000000000000.0; //用于记录上一个rmse，作为终止条件的一种，如果rmse上升了，则停止
         double nowRmse = 0.0;
-        for(int step = 0; step < 35; ++step){  //只迭代25次
+        for(int step = 0; step < 35; ++step){  //只迭代35次
             double rmse = 0;
             double n = 0;
             
