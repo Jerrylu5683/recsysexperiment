@@ -13,6 +13,14 @@ then
 else
     seperator=" "
 fi
+if [ -f "userIdStat.txt" ];
+then 
+    rm "userIdStat.txt"
+fi
+if [ -f "itemIdStat.txt" ];
+then
+    rm "itemIdStat.txt"
+fi
 
 awk -F"${seperator}" '
 BEGIN {
@@ -32,8 +40,6 @@ BEGIN {
     }
 }
 END {
-    print '' >  "userIdStat.txt";
-    print '' >  "itemIdStat.txt";
     for (userId in userArray) {
         print userId,userArray[userId] >> "userIdStat.txt";
         userNum++;
