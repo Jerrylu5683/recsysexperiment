@@ -11,7 +11,7 @@
 * Foundation; either version 1, or (at your option) any later version.
 */
 /**
- * 本程序的目的是实现koren在SIGKDD'08论文中的方法，the integrated model of global neighborhood based model 
+ * 本程序的目的是实现koren在SIGKDD'08论文中的方法，the integrated model of  latent factor global neighborhood based model 
  * and svd++
  */
 #include "movielens.h"

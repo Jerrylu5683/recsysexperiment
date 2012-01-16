@@ -98,17 +98,6 @@ namespace svd{
 	    	outputw << endl;
 	    }
 	    outputw.close();
-	    
-	    /*
-	    //Êä³öbiµÄÖµ
-        ofstream outputbi("bi.txt");
-	    for(int i=1; i < ITEM_NUM+1; i++)
-	    {
-	    	outputbi << i << "\t"<< bi[i] << endl;
-	    }
-	    outputbu.close();
-	    */
-	    
     }
     
     double getSim(int item1, int item2) {
