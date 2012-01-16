@@ -22,11 +22,11 @@
 	使用的代码在../replaceUserHotelId.php中，目前已经处理完毕，不过目前的情况是数据量太少
   
  */
-#include "tripadvisor.h"
+#include "rating.h"
 #include "mdefine.cpp"
 
 namespace svd{
-	//使用一些全局变量，存储需要估计的参数，bu，bi,wij
+    //使用一些全局变量，存储需要估计的参数，bu，bi,bc,wijc
     vector<double> user(USER_NUM+1,0);   //用于存储原始Id
     vector<double> hotel(ITEM_NUM+1,0);
     
@@ -47,9 +47,9 @@ namespace svd{
     map<int,int> rateMatrix[USER_NUM+1][CRI_NUM+1];   //使用二维个map数组存储稀疏的打分矩阵，是否有更好的方法？？？
 	double mean = 0;                         //全局的平均值
     
-    //函数声明u
+    //函数声明
     void RMSEProbe(void);
-    void  loadSim(char *fileName);
+    void loadSim(char *fileName);
     void ratingAll(vector< Rating > & data);
     double rating(Rating  record);
     double predictRate(int user,int item, int cri);

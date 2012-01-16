@@ -57,8 +57,8 @@ float dot(vector<float> &p, vector<float> &q)
 }
 
 /**
- * load filePathÖĞµÄÊı¾İµ½dataÕâ¸övectorÖĞºÍ rateMatrixÖĞ
- * ÕâÀïÒªÑ­»·Ä¿Â¼
+ * load filePathä¸­çš„æ•°æ®åˆ°dataè¿™ä¸ªvectorä¸­å’Œ rateMatrixä¸­
+ * è¿™é‡Œè¦å¾ªç¯ç›®å½•
  */
 void loadRating(char * dirPath,  map<int,int> rateMatrixLocal[USER_NUM+1][CRI_NUM+1])
 {
@@ -92,7 +92,7 @@ void loadRating(char * dirPath,  map<int,int> rateMatrixLocal[USER_NUM+1][CRI_NU
 	        
 	        if(rateDetail.size()>=3){
 	        	for(int c = 0; c<rateDetail.size() && c < 8; ++c) {
-	        		//³õÊ¼»¯rateMatrix
+	        		//åˆå§‹åŒ–rateMatrix
 	        		int rate = atoi(rateDetail[c].c_str());
 					if(-1 == rate) continue;
 					rateMatrixLocal[userId][c+1][itemId] = rate;
@@ -122,11 +122,11 @@ void explode(const char * probe,  char * data ,vector<string> &result)
 }
 
 /**
- * ¼ÆËãÈ«¾ÖµÄÆ½¾ùÖµ
+ * è®¡ç®—å…¨å±€çš„å¹³å‡å€¼
  */
 double setMeanRating(map<int,int> rateMatrixLocal[USER_NUM+1][CRI_NUM+1])
 {
-    //¼ÆËãÆ½¾ùÖµ;
+    //è®¡ç®—å¹³å‡å€¼;
     long double sum = 0;
     int num = 0;
     int tmp = 0;
