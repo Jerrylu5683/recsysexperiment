@@ -23,10 +23,11 @@
 #include <errno.h>
 #include <ctime>
 
-#define USER_NUM 14009
-#define ITEM_NUM 1850
-#define CRI_NUM 8
+#define USER_NUM 4652 
+#define ITEM_NUM 4244
+#define CRI_NUM 5
 #define DIR_PATH "../../tripDataset_t/"
+#define RATING_FILE_NAME "../../yahooMovie/selectRatings.maped"
 
 class Rating
 {
