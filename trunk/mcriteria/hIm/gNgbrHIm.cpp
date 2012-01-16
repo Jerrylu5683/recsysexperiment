@@ -11,43 +11,43 @@
 * Foundation; either version 1, or (at your option) any later version.
 */
 /**
- * ±¾³ÌĞòµÄÄ¿µÄÊÇ²âÊÔ global Neighborhood ·½·¨µÄÀ©Õ¹ĞÔ£¬½«Recommender system handbookÖĞµÄP171Ò³£¬5.35µÄ
- *  ¹«Ê½£¬À©Õ¹µ½3Î¬¶àÖ¸±ê´ò·ÖµÄÇé¿ö
+ * æœ¬ç¨‹åºçš„ç›®çš„æ˜¯æµ‹è¯• global Neighborhood æ–¹æ³•çš„æ‰©å±•æ€§ï¼Œå°†Recommender system handbookä¸­çš„P171é¡µï¼Œ5.35çš„
+ *  å…¬å¼ï¼Œæ‰©å±•åˆ°3ç»´å¤šæŒ‡æ ‡æ‰“åˆ†çš„æƒ…å†µ
  
-    ÊµÏÖµÄ·½Ê½Ò²ÊÇ½¥½øÊ½ÔöÇ¿£¨Progressive enhancement£©£¬²»ÒªÇóÒ»²½µ½Î»
+    å®ç°çš„æ–¹å¼ä¹Ÿæ˜¯æ¸è¿›å¼å¢å¼ºï¼ˆProgressive enhancementï¼‰ï¼Œä¸è¦æ±‚ä¸€æ­¥åˆ°ä½
     
     
-    ÕâÀïµÄÊı¾İid²»ÊÇ´Ó1¿ªÊ¼Ôö¼ÓµÄ£¬Õâ¸öĞèÒª×öÒ»ÏÂµ÷Õû£¬Ê¹Æä´Ó1¿ªÊ¼Ôö¼Ó£¬Ò»Ö±µ½USER_NUMÎªÖ¹£¬ÕâÊÇËùÓĞ´¦ÀíµÄµÚÒ»²½
-    ÕâÀï²ÉÓÃµÄ·½·¨ÊÇphp½Å±¾´¦Àí£¬½«ËùÓĞÔ­Ê¼Êı¾İ´¦ÀíÒ»±é£¬½øĞĞ±äÁ¿Ìæ»»
-	Ê¹ÓÃµÄ´úÂëÔÚ../replaceUserHotelId.phpÖĞ£¬Ä¿Ç°ÒÑ¾­´¦ÀíÍê±Ï£¬²»¹ıÄ¿Ç°µÄÇé¿öÊÇÊı¾İÁ¿Ì«ÉÙ
+    è¿™é‡Œçš„æ•°æ®idä¸æ˜¯ä»1å¼€å§‹å¢åŠ çš„ï¼Œè¿™ä¸ªéœ€è¦åšä¸€ä¸‹è°ƒæ•´ï¼Œä½¿å…¶ä»1å¼€å§‹å¢åŠ ï¼Œä¸€ç›´åˆ°USER_NUMä¸ºæ­¢ï¼Œè¿™æ˜¯æ‰€æœ‰å¤„ç†çš„ç¬¬ä¸€æ­¥
+    è¿™é‡Œé‡‡ç”¨çš„æ–¹æ³•æ˜¯phpè„šæœ¬å¤„ç†ï¼Œå°†æ‰€æœ‰åŸå§‹æ•°æ®å¤„ç†ä¸€éï¼Œè¿›è¡Œå˜é‡æ›¿æ¢
+	ä½¿ç”¨çš„ä»£ç åœ¨../replaceUserHotelId.phpä¸­ï¼Œç›®å‰å·²ç»å¤„ç†å®Œæ¯•ï¼Œä¸è¿‡ç›®å‰çš„æƒ…å†µæ˜¯æ•°æ®é‡å¤ªå°‘
   
  */
 #include "tripadvisor.h"
 #include "mdefine.cpp"
 
 namespace svd{
-	//Ê¹ÓÃÒ»Ğ©È«¾Ö±äÁ¿£¬´æ´¢ĞèÒª¹À¼ÆµÄ²ÎÊı£¬bu£¬bi,wij
-    vector<double> user(USER_NUM+1,0);   //ÓÃÓÚ´æ´¢Ô­Ê¼Id
+	//ä½¿ç”¨ä¸€äº›å…¨å±€å˜é‡ï¼Œå­˜å‚¨éœ€è¦ä¼°è®¡çš„å‚æ•°ï¼Œbuï¼Œbi,wij
+    vector<double> user(USER_NUM+1,0);   //ç”¨äºå­˜å‚¨åŸå§‹Id
     vector<double> hotel(ITEM_NUM+1,0);
     
     double bu[USER_NUM+1] = {0}; 
 	double bi[ITEM_NUM+1] = {0};
-	double bc[CRI_NUM+1]  = {0};      //baselineÔ¤²âÆ÷ÖĞµÄÓÃ»§Æ«ÖÃ,itemÆ«ÖÃ,criteriaÆ«ÖÃ
-    vector<int> buNum(USER_NUM+1,0);	//ÓÃ»§u´ò·ÖµÄitem×ÜÊı£¬
-    vector<int> biNum(ITEM_NUM+1,0);   //´ò¹ıitem i·ÖµÄÓÃ»§×ÜÊı
-    vector<int> bcNum(ITEM_NUM+1,0);   //ÔÚÕâ¸öcriteria´ò¹ı·ÖµÄÓÃ»§×ÜÊı
+	double bc[CRI_NUM+1]  = {0};      //baselineé¢„æµ‹å™¨ä¸­çš„ç”¨æˆ·åç½®,itemåç½®,criteriaåç½®
+    vector<int> buNum(USER_NUM+1,0);	//ç”¨æˆ·uæ‰“åˆ†çš„itemæ€»æ•°ï¼Œ
+    vector<int> biNum(ITEM_NUM+1,0);   //æ‰“è¿‡item iåˆ†çš„ç”¨æˆ·æ€»æ•°
+    vector<int> bcNum(ITEM_NUM+1,0);   //åœ¨è¿™ä¸ªcriteriaæ‰“è¿‡åˆ†çš„ç”¨æˆ·æ€»æ•°
 
-	vector<double> buBase(USER_NUM+1,0);	//ÓÃ»§u´ò·ÖµÄitem×ÜÊı£¬
-    vector<double> biBase(ITEM_NUM+1,0);   //´ò¹ıitem i·ÖµÄÓÃ»§×ÜÊı
-    vector<double> bcBase(ITEM_NUM+1,0);   //ÔÚÕâ¸öcriteria´ò¹ı·ÖµÄÓÃ»§×ÜÊı
+	vector<double> buBase(USER_NUM+1,0);	//ç”¨æˆ·uæ‰“åˆ†çš„itemæ€»æ•°ï¼Œ
+    vector<double> biBase(ITEM_NUM+1,0);   //æ‰“è¿‡item iåˆ†çš„ç”¨æˆ·æ€»æ•°
+    vector<double> bcBase(ITEM_NUM+1,0);   //åœ¨è¿™ä¸ªcriteriaæ‰“è¿‡åˆ†çš„ç”¨æˆ·æ€»æ•°
     
-    double wMatrix[ITEM_NUM+1][ITEM_NUM+1][CRI_NUM+1] = {0};  //ĞèÒªÑ§Ï°µÄitem-itemÏàËÆ¾ØÕó
-	double cMatrix[ITEM_NUM+1][ITEM_NUM+1][CRI_NUM+1] = {0};  //Òşº¬Òò×Ó¾ØÕó
+    double wMatrix[ITEM_NUM+1][ITEM_NUM+1][CRI_NUM+1] = {0};  //éœ€è¦å­¦ä¹ çš„item-itemç›¸ä¼¼çŸ©é˜µ
+	double cMatrix[ITEM_NUM+1][ITEM_NUM+1][CRI_NUM+1] = {0};  //éšå«å› å­çŸ©é˜µ
 
-    map<int,int> rateMatrix[USER_NUM+1][CRI_NUM+1];   //Ê¹ÓÃ¶şÎ¬¸ömapÊı×é´æ´¢Ï¡ÊèµÄ´ò·Ö¾ØÕó£¬ÊÇ·ñÓĞ¸üºÃµÄ·½·¨£¿£¿£¿
-	double mean = 0;                         //È«¾ÖµÄÆ½¾ùÖµ
+    map<int,int> rateMatrix[USER_NUM+1][CRI_NUM+1];   //ä½¿ç”¨äºŒç»´ä¸ªmapæ•°ç»„å­˜å‚¨ç¨€ç–çš„æ‰“åˆ†çŸ©é˜µï¼Œæ˜¯å¦æœ‰æ›´å¥½çš„æ–¹æ³•ï¼Ÿï¼Ÿï¼Ÿ
+	double mean = 0;                         //å…¨å±€çš„å¹³å‡å€¼
     
-    //º¯ÊıÉùÃ÷u
+    //å‡½æ•°å£°æ˜u
     void RMSEProbe(void);
     void  loadSim(char *fileName);
     void ratingAll(vector< Rating > & data);
@@ -90,7 +90,7 @@ namespace svd{
 			}  			
 		}
 
-        //ÒÔÏÂ¹ı³ÌÇóÆ½¾ùÖµ
+        //ä»¥ä¸‹è¿‡ç¨‹æ±‚å¹³å‡å€¼
         for(i = 1; i < USER_NUM+1; ++i) {
         	if(buNum[i]>1)bu[i] = bu[i]/buNum[i] - mean;
         	else bu[i] = 0.0;
@@ -116,27 +116,27 @@ namespace svd{
 		for(i = 1; i < ITEM_NUM+1; ++i){
             //cout<< bu[i] << endl;
 			for(j = 1; j < ITEM_NUM+1; ++j){
-	            setRand(wMatrix[i][j],CRI_NUM+1,0);    //³õÊ¼»¯w[i]
+	            setRand(wMatrix[i][j],CRI_NUM+1,0);    //åˆå§‹åŒ–w[i]
 			}
         }
 		cout<<"wMatrix initialized end"<<endl;
         //initialize the cMatrix        
         for(i = 1; i < ITEM_NUM+1; ++i){
 			for(j = 1; j < ITEM_NUM+1; ++j){
-	            setRand(cMatrix[i][j],CRI_NUM+1,0);    //³õÊ¼»¯c[i]
+	            setRand(cMatrix[i][j],CRI_NUM+1,0);    //åˆå§‹åŒ–c[i]
 			}
         }
         cout<<"cMatrix initialized end"<<endl; 
         cout <<"initialization end!"<<endl<< "begin iteration: " << endl;
         
-        double pui = 0.0 ; // Ô¤²âµÄu¶ÔiµÄ´ò·Ö
-        double preRmse = 1000000000000.0; //ÓÃÓÚ¼ÇÂ¼ÉÏÒ»¸örmse£¬×÷ÎªÖÕÖ¹Ìõ¼şµÄÒ»ÖÖ£¬Èç¹ûrmseÉÏÉıÁË£¬ÔòÍ£Ö¹
+        double pui = 0.0 ; // é¢„æµ‹çš„uå¯¹içš„æ‰“åˆ†
+        double preRmse = 1000000000000.0; //ç”¨äºè®°å½•ä¸Šä¸€ä¸ªrmseï¼Œä½œä¸ºç»ˆæ­¢æ¡ä»¶çš„ä¸€ç§ï¼Œå¦‚æœrmseä¸Šå‡äº†ï¼Œåˆ™åœæ­¢
         double nowRmse = 0.0;
-        for(int step = 0; step < 35; ++step){  //Ö»µü´ú35´Î
+        for(int step = 0; step < 35; ++step){  //åªè¿­ä»£35æ¬¡
             double rmse = 0;
             double n = 0;
             
-            for( u = 1; u < USER_NUM+1; ++u) {   //Ñ­»·´¦ÀíÃ¿Ò»¸öÓÃ»§ 
+            for( u = 1; u < USER_NUM+1; ++u) {   //å¾ªç¯å¤„ç†æ¯ä¸€ä¸ªç”¨æˆ· 
                 for( cIndex = 1; cIndex < CRI_NUM+1; ++cIndex) {
 					int ruNum = rateMatrix[u][cIndex].size();
 					//if(ruNum > 0)cout<<u<<"	"<<cIndex<<"	"<<ruNum<<endl;
@@ -156,7 +156,7 @@ namespace svd{
 						}
 						rmse += eui * eui; ++n;  
 						
-						//update bu£¬bi,bc
+						//update buï¼Œbi,bc
 						bu[u] += alpha * (eui - beta * bu[u]);
 						bi[itemId] += alpha * (eui - beta * bi[itemId]);
 						bc[cIndex] += alpha * (eui - beta * bc[cIndex]);
@@ -177,19 +177,19 @@ namespace svd{
 
             }
             nowRmse =  sqrt(rmse / n);
-            if( nowRmse >= preRmse && step > 10) break; //Èç¹ûrmseÒÑ¾­¿ªÊ¼ÉÏÉıÁË£¬ÔòÌø³öÑ­»·
+            if( nowRmse >= preRmse && step > 10) break; //å¦‚æœrmseå·²ç»å¼€å§‹ä¸Šå‡äº†ï¼Œåˆ™è·³å‡ºå¾ªç¯
             else
             	preRmse = nowRmse;
             cout << step << "\t" << nowRmse << endl;
-            //alpha *= 0.992;    //Öğ²½¼õĞ¡Ñ§Ï°ËÙÂÊ
+            //alpha *= 0.992;    //é€æ­¥å‡å°å­¦ä¹ é€Ÿç‡
             //RMSEProbe(); 
         }
-        //ratingAll(data);  //Ô¤²âËùÓĞµÄ½á¹û
+        //ratingAll(data);  //é¢„æµ‹æ‰€æœ‰çš„ç»“æœ
         
-        RMSEProbe();  // ¼ì²éÑµÁ·¼¯Çé¿ö
+        RMSEProbe();  // æ£€æŸ¥è®­ç»ƒé›†æƒ…å†µ
         return;
         
-        //Êä³öbuµÄÖµ
+        //è¾“å‡ºbuçš„å€¼
         ofstream outputbu("bu.txt");
 	    for(int i=1; i < USER_NUM+1; i++)
 	    {
@@ -197,7 +197,7 @@ namespace svd{
 	    }
 	    outputbu.close();
 	    
-	    //Êä³öbiµÄÖµ
+	    //è¾“å‡ºbiçš„å€¼
         ofstream outputbi("bi.txt");
 	    for(int i=1; i < ITEM_NUM+1; i++)
 	    {
@@ -234,12 +234,12 @@ namespace svd{
 		return ret;
     }
     
-    //¼ì²é²âÊÔ¼¯Çé¿ö
+    //æ£€æŸ¥æµ‹è¯•é›†æƒ…å†µ
     void RMSEProbe(void){
     	
-        /*	1¡¢load testÊı¾İ¼¯£¬
-        	2¡¢Õë¶ÔÃ¿Ò»ÌõÊı¾İ£¬¼ÆËãÔ¤²âÖµ£¬È»ºó¼ÆËãÎó²îµÄÆ½·½ºÍ£¬¼ÆËã×ÜÊıÁ¿
-        	3¡¢Êä³örmse
+        /*	1ã€load testæ•°æ®é›†ï¼Œ
+        	2ã€é’ˆå¯¹æ¯ä¸€æ¡æ•°æ®ï¼Œè®¡ç®—é¢„æµ‹å€¼ï¼Œç„¶åè®¡ç®—è¯¯å·®çš„å¹³æ–¹å’Œï¼Œè®¡ç®—æ€»æ•°é‡
+        	3ã€è¾“å‡ºrmse
         
         std::ifstream from("../../mldataset/u1.test");
         char rateStr[100];
@@ -270,8 +270,8 @@ int main(int argc, char ** argv)
 {
 	double start,end,duration; 
 	start = clock();
-    double alpha = 0.005;  //¾­²âÊÔÕâ¸öÖµ±È½ÏºÃ
-    double beta = 0.002;   //¾­¹ı²âÊÔÕâ¸öÒ²»¹ĞĞ
+    double alpha = 0.005;  //ç»æµ‹è¯•è¿™ä¸ªå€¼æ¯”è¾ƒå¥½
+    double beta = 0.002;   //ç»è¿‡æµ‹è¯•è¿™ä¸ªä¹Ÿè¿˜è¡Œ
     int dim = 100;//atoi(argv[1]);
     test_level = 1;//atoi(argv[2]);
     ofstream outputfile("parameter.txt");
